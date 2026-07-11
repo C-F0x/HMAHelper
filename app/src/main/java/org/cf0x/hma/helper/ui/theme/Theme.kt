@@ -5,9 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -16,20 +14,11 @@ import com.materialkolor.PaletteStyle
 import org.cf0x.hma.helper.data.ColorSource
 import org.cf0x.hma.helper.data.ThemeMode
 
-// CompositionLocal to allow components to check for expressive mode
-val LocalExpressiveMode = staticCompositionLocalOf { true }
+// MD3 Expressive shapes — default style
+// AppRoundShape is the single consistent round-corner value used across all new UI components
+val AppRoundShape = RoundedCornerShape(12.dp)
 
-// Standard M3 Shapes - Strictly following M3 guidelines
-val StandardShapes = Shapes(
-    extraSmall = RoundedCornerShape(4.dp),
-    small      = RoundedCornerShape(8.dp),
-    medium     = RoundedCornerShape(12.dp),
-    large      = RoundedCornerShape(16.dp),
-    extraLarge = RoundedCornerShape(28.dp)
-)
-
-// Expressive M3 Shapes with bolder, larger radii
-val ExpressiveShapes = Shapes(
+private val Shapes = Shapes(
     extraSmall = RoundedCornerShape(4.dp),
     small      = RoundedCornerShape(12.dp),
     medium     = RoundedCornerShape(20.dp),
@@ -42,7 +31,6 @@ fun HMAHelperTheme(
     themeMode: ThemeMode     = ThemeMode.SYSTEM,
     colorSource: ColorSource = ColorSource.MONET,
     seedColor: Color         = Color(0xFF6750A4),
-    isExpressive: Boolean    = true,
     paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     content: @Composable () -> Unit
 ) {
@@ -63,21 +51,17 @@ fun HMAHelperTheme(
         }
     } ?: seedColor
 
-    val dynamicTypography = getTypography(isExpressive)
-
-    CompositionLocalProvider(LocalExpressiveMode provides isExpressive) {
-        DynamicMaterialTheme(
-            seedColor    = effectiveSeed,
-            isDark       = isDark,
-            animate      = true,
-            style        = paletteStyle,
-            typography   = dynamicTypography,
-            shapes       = if (isExpressive) ExpressiveShapes else StandardShapes
-        ) {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                content = content
-            )
-        }
+    DynamicMaterialTheme(
+        seedColor    = effectiveSeed,
+        isDark       = isDark,
+        animate      = true,
+        style        = paletteStyle,
+        typography   = expressiveTypography(),
+        shapes       = Shapes
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            content = content
+        )
     }
 }

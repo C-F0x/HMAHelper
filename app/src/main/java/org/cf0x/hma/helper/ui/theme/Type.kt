@@ -7,12 +7,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Dynamic Typography based on Expressive Mode
+// MD3 Expressive typography — semi-bold headings with tighter tracking
 @Composable
-fun getTypography(isExpressive: Boolean): Typography {
-    val weight = if (isExpressive) FontWeight.SemiBold else FontWeight.Medium
-    val tracking = if (isExpressive) (-0.02).sp else 0.sp
-    val bodyWeight = FontWeight.Normal
+fun expressiveTypography(): Typography {
+    val weight = FontWeight.SemiBold
+    val tracking = (-0.02).sp
 
     return Typography(
         headlineLarge = TextStyle(
@@ -45,7 +44,7 @@ fun getTypography(isExpressive: Boolean): Typography {
         ),
         bodyLarge = TextStyle(
             fontFamily    = FontFamily.Default,
-            fontWeight    = bodyWeight,
+            fontWeight    = FontWeight.Normal,
             fontSize      = 16.sp,
             lineHeight    = 24.sp,
             letterSpacing = 0.5.sp

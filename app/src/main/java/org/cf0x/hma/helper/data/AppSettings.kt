@@ -43,7 +43,6 @@ class AppSettings(private val context: Context) {
         val COLOR_SOURCE       = stringPreferencesKey("color_source")
         val PRESET_COLOR       = intPreferencesKey("preset_color")
         val APP_LOCALE         = stringPreferencesKey("app_locale")
-        val THEME_EXPRESSIVE   = booleanPreferencesKey("theme_expressive")
         val PALETTE_STYLE      = stringPreferencesKey("palette_style")
     }
 
@@ -86,12 +85,9 @@ class AppSettings(private val context: Context) {
             .also { if (it == PaletteStyle.TonalSpot && p[Keys.PALETTE_STYLE] != null && p[Keys.PALETTE_STYLE] != PaletteStyle.TonalSpot.name) Log.w("AppSettings", "Unknown PALETTE_STYLE: ${p[Keys.PALETTE_STYLE]}") }
     }
 
-    val themeExpressive: Flow<Boolean> = context.dataStore.data.map { it[Keys.THEME_EXPRESSIVE] ?: true }
-
     suspend fun saveThemeMode(m: ThemeMode) = context.dataStore.edit { it[Keys.THEME_MODE] = m.name }
     suspend fun saveColorSource(s: ColorSource) = context.dataStore.edit { it[Keys.COLOR_SOURCE] = s.name }
     suspend fun savePresetColor(c: Int) = context.dataStore.edit { it[Keys.PRESET_COLOR] = c }
     suspend fun saveAppLocale(l: AppLocale) = context.dataStore.edit { it[Keys.APP_LOCALE] = l.tag }
-    suspend fun saveThemeExpressive(v: Boolean) = context.dataStore.edit { it[Keys.THEME_EXPRESSIVE] = v }
     suspend fun savePaletteStyle(s: PaletteStyle) = context.dataStore.edit { it[Keys.PALETTE_STYLE] = s.name }
 }

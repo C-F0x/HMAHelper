@@ -57,14 +57,12 @@ fun SettingsScreen(
     var colorSource  by remember { mutableStateOf(if (supportsMonet) ColorSource.MONET else ColorSource.PRESET) }
     var savedColor   by remember { mutableStateOf(Color(0xFF6750A4)) }
     val appLocale    by appSettings.appLocale.collectAsState(initial = AppLocale.SYSTEM)
-    var isExpressive by remember { mutableStateOf(true) }
     var paletteStyle by remember { mutableStateOf(PaletteStyle.TonalSpot) }
 
     LaunchedEffect(Unit) {
         themeMode    = appSettings.themeMode.first()
         colorSource  = appSettings.colorSource.first()
         savedColor   = appSettings.presetColor.first()
-        isExpressive = appSettings.themeExpressive.first()
         paletteStyle = appSettings.paletteStyle.first()
         loaded       = true
     }
@@ -155,11 +153,6 @@ fun SettingsScreen(
 
                     // Palette Style selector
                     PaletteStyleItem(paletteStyle) { paletteStyle = it; scope.launch { appSettings.savePaletteStyle(it) } }
-
-                    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                    // Expressive shapes toggle
-                    ExpressiveToggleItem(isExpressive) { isExpressive = it; scope.launch { appSettings.saveThemeExpressive(it) } }
                 }
             }
 
@@ -216,27 +209,6 @@ private fun SettingHeader(icon: ImageVector, title: String) {
             text  = title,
             style = MaterialTheme.typography.titleMedium
         )
-    }
-}
-
-@Composable
-private fun ExpressiveToggleItem(enabled: Boolean, onToggle: (Boolean) -> Unit) {
-    Row(
-        Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Outlined.RoundedCorner,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(20.dp)
-        )
-        Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.setting_theme_expressive), style = MaterialTheme.typography.bodyLarge)
-            Text(stringResource(R.string.setting_theme_expressive_desc), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.outline)
-        }
-        Switch(checked = enabled, onCheckedChange = onToggle)
     }
 }
 

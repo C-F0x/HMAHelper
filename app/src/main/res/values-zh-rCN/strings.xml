@@ -8,6 +8,34 @@
     <string name="status_operational">运行中</string>
     <string name="total_taps">总点击数: %d</string>
 
+    <string name="main_status_title">状态概览</string>
+    <string name="main_total_apps">Template Apps: %d</string>
+    <string name="main_scope_count">Scope Apps: %d</string>
+    <string name="main_import">导入</string>
+    <string name="main_export">导出</string>
+    <string name="main_smart_classify">智能分类</string>
+    <string name="dialog_title_import">导入配置</string>
+    <string name="dialog_title_export">导出配置</string>
+    <string name="dialog_message_import">从设备导入 JSON 配置文件。</string>
+    <string name="dialog_message_export">将当前配置导出为 JSON 文件。</string>
+    <string name="dialog_cancel">取消</string>
+
+    <string name="config_enable_hide">启用隐藏</string>
+    <string name="config_work_mode">工作模式</string>
+    <string name="config_blacklist">黑名单</string>
+    <string name="config_whitelist">白名单</string>
+    <string name="config_exclude_system">排除系统应用</string>
+    <string name="config_aggressive_filter">激进的意图过滤</string>
+    <string name="config_templates_header">已启用 %d 个模板</string>
+    <string name="config_extra_apps">额外包名列表</string>
+    <string name="nav_app_config">应用配置</string>
+
+    <string name="main_app_manager">软件管理</string>
+    <string name="nav_app_manager">软件管理</string>
+    <string name="app_manager_search">搜索应用…</string>
+    <string name="app_manager_tab_user">用户</string>
+    <string name="app_manager_tab_system">系统</string>
+
     <string name="setting_language">界面语言</string>
     <string name="setting_language_system">系统默认</string>
     <string name="setting_language_zh">简体中文</string>

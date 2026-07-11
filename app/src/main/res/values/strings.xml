@@ -7,6 +7,34 @@
     <string name="status_operational">Operational</string>
     <string name="total_taps">Total Taps: %d</string>
 
+    <string name="main_status_title">Overview</string>
+    <string name="main_total_apps">Template Apps: %d</string>
+    <string name="main_scope_count">Scope Apps: %d</string>
+    <string name="main_import">Import</string>
+    <string name="main_export">Export</string>
+    <string name="main_smart_classify">Smart Classification</string>
+    <string name="dialog_title_import">Import Config</string>
+    <string name="dialog_title_export">Export Config</string>
+    <string name="dialog_message_import">Import a JSON configuration file from your device.</string>
+    <string name="dialog_message_export">Export the current configuration as a JSON file.</string>
+    <string name="dialog_cancel">Cancel</string>
+
+    <string name="config_enable_hide">Enable Hide</string>
+    <string name="config_work_mode">Work Mode</string>
+    <string name="config_blacklist">Blacklist</string>
+    <string name="config_whitelist">Whitelist</string>
+    <string name="config_exclude_system">Exclude System Apps</string>
+    <string name="config_aggressive_filter">Aggressive Intent Filter</string>
+    <string name="config_templates_header">Enabled %d Templates</string>
+    <string name="config_extra_apps">Extra App List</string>
+    <string name="nav_app_config">App Config</string>
+
+    <string name="main_app_manager">App Manager</string>
+    <string name="nav_app_manager">App Manager</string>
+    <string name="app_manager_search">Search apps…</string>
+    <string name="app_manager_tab_user">User</string>
+    <string name="app_manager_tab_system">System</string>
+
     <string name="setting_language">Language</string>
     <string name="setting_language_system">System Default</string>
     <string name="setting_language_zh">Simplified Chinese</string>

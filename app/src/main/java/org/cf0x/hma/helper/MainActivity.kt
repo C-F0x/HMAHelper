@@ -20,6 +20,7 @@ import org.cf0x.hma.helper.data.AppSettings
 import org.cf0x.hma.helper.data.ColorSource
 import org.cf0x.hma.helper.data.ThemeMode
 import org.cf0x.hma.helper.ui.theme.HMAHelperTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
@@ -36,14 +37,12 @@ class MainActivity : ComponentActivity() {
             val themeMode       by appSettings.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
             val colorSource     by appSettings.colorSource.collectAsState(initial = ColorSource.MONET)
             val presetColor     by appSettings.presetColor.collectAsState(initial = Color(0xFF6750A4))
-            val themeExpressive by appSettings.themeExpressive.collectAsState(initial = true)
             val paletteStyle    by appSettings.paletteStyle.collectAsState(initial = PaletteStyle.TonalSpot)
 
             HMAHelperTheme(
                 themeMode    = themeMode,
                 colorSource  = colorSource,
                 seedColor    = presetColor,
-                isExpressive = themeExpressive,
                 paletteStyle = paletteStyle,
             ) {
                 AppNavigation(appSettings)
@@ -72,6 +71,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation(appSettings: AppSettings) {
     val navController = rememberNavController()
+    val appManagerVM: AppManagerViewModel = viewModel()
     
     NavHost(
         navController = navController,
@@ -81,6 +81,9 @@ fun AppNavigation(appSettings: AppSettings) {
             MainScreen(
                 onSettingsClick = {
                     navController.navigate("settings")
+                },
+                onAppManagerClick = {
+                    navController.navigate("app_manager")
                 },
                 onPresetClick = { name ->
                     navController.navigate("preset/$name")
@@ -103,6 +106,57 @@ fun AppNavigation(appSettings: AppSettings) {
             PresetScreen(
                 presetName = name,
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable("app_manager") {
+            AppManagerScreen(
+                viewModel = appManagerVM,
+                onBackClick = { navController.popBackStack() },
+                onAppConfigClick = { pkgs ->
+                    appManagerVM.clearSelection()
+                    val pkgsStr = pkgs.joinToString(",")
+                    navController.navigate("app_config/$pkgsStr")
+                }
+            )
+        }
+        composable(
+            route = "app_config/{packageNames}",
+            arguments = listOf(navArgument("packageNames") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val pkgsStr = backStackEntry.arguments?.getString("packageNames") ?: return@composable
+            val pkgs = pkgsStr.split(",").filter { it.isNotBlank() }
+            AppConfigScreen(
+                packageNames = pkgs,
+                viewModel = appManagerVM,
+                onBackClick = { navController.popBackStack() },
+                onExtraAppListClick = { configPkg, currentExtra ->
+                    appManagerVM.saveConfig(configPkg, AppScopeConfig(
+                        useWhitelist = false,
+                        aggressiveFilter = false,
+                        excludeSystemApps = true,
+                        enabledTemplates = emptyList(),
+                        extraAppList = currentExtra
+                    ))
+                    navController.navigate("extra_app_list/$configPkg")
+                }
+            )
+        }
+        composable(
+            route = "extra_app_list/{configPackageName}",
+            arguments = listOf(navArgument("configPackageName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val configPkg = backStackEntry.arguments?.getString("configPackageName") ?: return@composable
+            val initialExtra = appManagerVM.getConfig(configPkg)?.extraAppList ?: emptyList()
+            ExtraAppListScreen(
+                configPackageName = configPkg,
+                initialSelection = initialExtra,
+                viewModel = appManagerVM,
+                onBackClick = { navController.popBackStack() },
+                onConfirm = { selectedPkgs ->
+                    val existing = appManagerVM.getConfig(configPkg) ?: AppScopeConfig()
+                    appManagerVM.saveConfig(configPkg, existing.copy(extraAppList = selectedPkgs))
+                    navController.popBackStack()
+                }
             )
         }
     }

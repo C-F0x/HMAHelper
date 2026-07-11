@@ -21,7 +21,6 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import org.cf0x.hma.helper.ui.theme.LocalExpressiveMode
 
 @Composable
 fun SegmentSwitch(
@@ -31,8 +30,7 @@ fun SegmentSwitch(
     onSelect: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isExpressive = LocalExpressiveMode.current
-    val containerShape = if (isExpressive) MaterialTheme.shapes.extraLarge else MaterialTheme.shapes.medium
+    val containerShape = MaterialTheme.shapes.extraLarge
     
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (label.isNotEmpty()) {
