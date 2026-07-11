@@ -1,0 +1,74 @@
+<resources>
+    <string name="app_name">HMA Helper</string>
+    <string name="nav_main">Dashboard</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="system_status">System Status</string>
+    <string name="status_operational">Operational</string>
+    <string name="total_taps">Total Taps: %d</string>
+
+    <string name="setting_language">Language</string>
+    <string name="setting_language_system">System Default</string>
+    <string name="setting_language_zh">Simplified Chinese</string>
+    <string name="setting_language_zh_tw">繁體中文</string>
+    <string name="setting_language_ja">日本語</string>
+    <string name="setting_language_ko">한국어</string>
+    <string name="setting_language_fr">Français</string>
+    <string name="setting_language_system_managed">Managed by system settings</string>
+    <string name="setting_language_en">English</string>
+
+    <string name="setting_theme_mode">Theme Mode</string>
+    <string name="setting_theme_system">System Default</string>
+    <string name="setting_theme_light">Light</string>
+    <string name="setting_theme_dark">Dark</string>
+
+    <string name="setting_color_source">Color Source</string>
+    <string name="setting_color_system">System Accent</string>
+    <string name="setting_color_monet">Monet (System)</string>
+    <string name="setting_color_preset">Preset</string>
+    <string name="setting_color_custom">Custom Pick</string>
+
+    <string name="setting_palette_style">Color Palette Style</string>
+    <string name="setting_palette_style_tonalspot">Tonal Spot</string>
+    <string name="setting_palette_style_neutral">Neutral</string>
+    <string name="setting_palette_style_vibrant">Vibrant</string>
+    <string name="setting_palette_style_expressive">Expressive</string>
+    <string name="setting_palette_style_monochrome">Monochrome</string>
+    <string name="setting_palette_style_fidelity">Fidelity</string>
+    <string name="setting_palette_style_rainbow">Rainbow</string>
+    <string name="setting_theme_expressive">Expressive Style</string>
+    <string name="setting_theme_expressive_desc">Bolder shapes and typography.</string>
+
+    <string name="toast_clicked">Clicked: %s</string>
+
+    <string name="card_add_confirm">Confirm</string>
+    <string name="card_add_cancel">Cancel</string>
+
+    <string name="preset_refresh">Refresh</string>
+    <string name="preset_app_count">%d apps</string>
+    <string name="preset_view_detail">View →</string>
+    <string name="preset_empty">No apps detected</string>
+    <string name="preset_app_detail">Details</string>
+
+    <!-- Preset names -->
+    <string name="preset_name_xposed">Xposed Modules</string>
+    <string name="preset_name_embedded_xposed">Embedded Xposed</string>
+    <string name="preset_name_managers">Managers</string>
+    <string name="preset_name_privileged_apps">Privileged Apps</string>
+    <string name="preset_name_custom_rom">Custom ROM</string>
+    <string name="preset_name_accessibility_apps">Accessibility Services</string>
+
+    <!-- Preset subtitles -->
+    <string name="preset_subtitle_xposed">Identified via manifest metadata</string>
+    <string name="preset_subtitle_embedded_xposed">Detected via manifest marks &amp; native hook libs</string>
+    <string name="preset_subtitle_managers">Keyword-matched manager applications</string>
+    <string name="preset_subtitle_privileged_apps">Apps elevated via ADB / Root privileges</string>
+    <string name="preset_subtitle_custom_rom">System path &amp; package name fingerprint</string>
+    <string name="preset_subtitle_accessibility_apps">Apps declaring accessibility services</string>
+
+    <!-- Preset count suffix -->
+    <string name="preset_count_suffix">%d apps</string>
+
+    <!-- Preset detail -->
+    <string name="preset_not_installed">Not installed</string>
+</resources>
