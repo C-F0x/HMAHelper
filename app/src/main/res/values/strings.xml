@@ -21,7 +21,7 @@
     <string name="status_operational">Operational</string>
 
     <string name="main_status_title">Overview</string>
-    <string name="main_total_apps">Templates: 6+%d</string>
+    <string name="main_total_apps">Templates: 12+%d</string>
     <string name="main_scope_count">Scope: %d</string>
     <string name="main_import">Import</string>
     <string name="main_export">Export</string>
@@ -91,7 +91,7 @@
 
     <string name="main_app_manager">App Manager</string>
     <string name="main_extra_app_select">Select Extra Apps</string>
-    <string name="main_template_create">Create Template</string>
+    <string name="main_template_create">Custom template</string>
     <string name="app_manager_search">Search apps…</string>
     <string name="app_manager_tab_user">User</string>
     <string name="app_manager_tab_system">System</string>

@@ -52,6 +52,7 @@ fun AppManagerScreen(
     onBackClick: () -> Unit,
     onAppConfigClick: (List<String>) -> Unit = { _ -> },
     onExtraConfirm: ((List<String>) -> Unit)? = null,
+    titleRes: Int? = null,
     viewModel: AppManagerViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -67,8 +68,10 @@ fun AppManagerScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = if (onExtraConfirm != null) stringResource(R.string.main_extra_app_select)
-                        else stringResource(R.string.app_manager_title),
+                        text = stringResource(
+                            titleRes ?: if (onExtraConfirm != null) R.string.main_extra_app_select
+                            else R.string.app_manager_title
+                        ),
                         fontWeight = FontWeight.Bold
                     )
                 },

@@ -5,7 +5,7 @@
     <string name="system_status">系統狀態</string>
     <string name="status_operational">運行中</string>
     <string name="main_status_title">狀態概覽</string>
-    <string name="main_total_apps">Template Apps: %d</string>
+    <string name="main_total_apps">模板: 12+%d</string>
     <string name="main_scope_count">Scope: %d</string>
     <string name="main_import">匯入</string>
     <string name="main_export">匯出</string>
@@ -28,7 +28,7 @@
     <string name="nav_app_config">應用配置</string>
     <string name="main_app_manager">軟體管理</string>
     <string name="main_extra_app_select">選擇額外包名</string>
-    <string name="main_template_create">建立模板</string>
+    <string name="main_template_create">自訂模板</string>
     <string name="app_manager_search">搜尋應用…</string>
     <string name="app_manager_tab_user">使用者</string>
     <string name="app_manager_tab_system">系統</string>

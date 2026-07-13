@@ -1,0 +1,9 @@
+# Keep enum names used via valueOf() from DataStore preference strings
+-keepnames enum org.cf0x.hma.helper.data.ThemeMode { *; }
+-keepnames enum org.cf0x.hma.helper.data.ColorSource { *; }
+-keepnames enum com.materialkolor.PaletteStyle { *; }
+
+# Keep ViewModel constructors — invoked reflectively by viewModel() composable
+-keepclassmembers class * extends androidx.lifecycle.ViewModel {
+    <init>(android.app.Application);
+}

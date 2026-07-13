@@ -5,7 +5,7 @@
     <string name="system_status">システム状態</string>
     <string name="status_operational">動作中</string>
     <string name="main_status_title">概要</string>
-    <string name="main_total_apps">テンプレートアプリ: %d</string>
+    <string name="main_total_apps">テンプレート: 12+%d</string>
     <string name="main_scope_count">スコープアプリ: %d</string>
     <string name="main_import">インポート</string>
     <string name="main_export">エクスポート</string>
@@ -28,7 +28,7 @@
     <string name="nav_app_config">アプリ設定</string>
     <string name="main_app_manager">アプリ管理</string>
     <string name="main_extra_app_select">追加アプリを選択</string>
-    <string name="main_template_create">テンプレート作成</string>
+    <string name="main_template_create">カスタムテンプレート</string>
     <string name="app_manager_search">アプリを検索…</string>
     <string name="app_manager_tab_user">ユーザー</string>
     <string name="app_manager_tab_system">システム</string>

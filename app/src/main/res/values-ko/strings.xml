@@ -5,7 +5,7 @@
     <string name="system_status">시스템 상태</string>
     <string name="status_operational">작동 중</string>
     <string name="main_status_title">개요</string>
-    <string name="main_total_apps">템플릿 앱: %d</string>
+    <string name="main_total_apps">템플릿: 12+%d</string>
     <string name="main_scope_count">스코프 앱: %d</string>
     <string name="main_import">가져오기</string>
     <string name="main_export">내보내기</string>
@@ -28,7 +28,7 @@
     <string name="nav_app_config">앱 설정</string>
     <string name="main_app_manager">앱 관리</string>
     <string name="main_extra_app_select">추가 앱 선택</string>
-    <string name="main_template_create">템플릿 생성</string>
+    <string name="main_template_create">사용자 정의 템플릿</string>
     <string name="app_manager_search">앱 검색…</string>
     <string name="app_manager_tab_user">사용자</string>
     <string name="app_manager_tab_system">시스템</string>

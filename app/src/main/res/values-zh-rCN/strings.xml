@@ -17,7 +17,7 @@
     <string name="status_operational">运行中</string>
 
     <string name="main_status_title">状态概览</string>
-    <string name="main_total_apps">模板: 6+%d</string>
+    <string name="main_total_apps">模板: 12+%d</string>
     <string name="main_scope_count">作用域: %d</string>
     <string name="main_import">导入</string>
     <string name="main_export">导出</string>
@@ -85,9 +85,9 @@
     <string name="config_delete_button">删除</string>
     <string name="nav_app_config">应用配置</string>
 
-    <string name="main_app_manager">软件管理</string>
+    <string name="main_app_manager">配置管理</string>
     <string name="main_extra_app_select">选择额外包名</string>
-    <string name="main_template_create">创建模板</string>
+    <string name="main_template_create">自定义模板</string>
     <string name="app_manager_search">搜索应用…</string>
     <string name="app_manager_tab_user">用户</string>
     <string name="app_manager_tab_system">系统</string>

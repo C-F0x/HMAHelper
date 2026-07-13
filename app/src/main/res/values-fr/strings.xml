@@ -63,7 +63,7 @@
 
     <string name="main_app_manager">Gestionnaire d\'apps</string>
     <string name="main_extra_app_select">Sélectionner des apps supplémentaires</string>
-    <string name="main_template_create">Créer un modèle</string>
+    <string name="main_template_create">Modèle personnalisé</string>
     <string name="app_manager_search">Rechercher des apps…</string>
     <string name="app_manager_tab_user">Utilisateur</string>
     <string name="app_manager_tab_system">Système</string>

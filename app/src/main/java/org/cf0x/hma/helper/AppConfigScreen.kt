@@ -104,6 +104,12 @@ fun AppConfigScreen(
     // Custom templates from ViewModel
     val customTemplates by viewModel.templates.collectAsState()
 
+    // Filter templates by current mode (blacklist / whitelist)
+    val filteredPresetTemplates = presetTemplates.filter { t ->
+        t.storedName.endsWith("_whitelist") == useWhitelist
+    }
+    val filteredCustomTemplates = customTemplates.filter { it.isWhitelist == useWhitelist }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -202,7 +208,14 @@ fun AppConfigScreen(
                                     stringResource(R.string.config_whitelist)
                                 ),
                                 selectedIndex = if (useWhitelist) 1 else 0,
-                                onSelect = { useWhitelist = it == 1 }
+                                onSelect = { index ->
+                                    val newMode = index == 1
+                                    useWhitelist = newMode
+                                    // Drop templates that don't match the new mode
+                                    enabledTemplates = enabledTemplates.filter { name ->
+                                        name.endsWith("_whitelist") == newMode
+                                    }.toSet()
+                                }
                             )
 
                             // 2. excludeSystemApps (whitelist only)
@@ -270,7 +283,7 @@ fun AppConfigScreen(
                                             color = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                                         )
-                                        presetTemplates.forEach { template ->
+                                        filteredPresetTemplates.forEach { template ->
                                             TemplateCheckboxRow(
                                                 name = template.storedName,
                                                 label = { Text(stringResource(template.displayLabelRes), style = MaterialTheme.typography.bodyLarge) },
@@ -285,7 +298,7 @@ fun AppConfigScreen(
                                         }
 
                                         // ── Custom templates ──
-                                        if (customTemplates.isNotEmpty()) {
+                                        if (filteredCustomTemplates.isNotEmpty()) {
                                             HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), modifier = Modifier.padding(vertical = 4.dp))
                                             Text(
                                                 text = stringResource(R.string.main_template_create),
@@ -293,7 +306,7 @@ fun AppConfigScreen(
                                                 color = MaterialTheme.colorScheme.primary,
                                                 modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                                             )
-                                            customTemplates.forEach { t ->
+                                            filteredCustomTemplates.forEach { t ->
                                                 TemplateCheckboxRow(
                                                     name = t.name,
                                                     label = { Text(t.name, style = MaterialTheme.typography.bodyLarge) },
@@ -327,7 +340,18 @@ fun AppConfigScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     Text(stringResource(R.string.config_extra_apps), style = MaterialTheme.typography.bodyLarge)
-                                    TextButton(onClick = { onExtraAppListClick(refPkg, extraPackages) }) {
+                                    TextButton(onClick = {
+                                        // Persist local state before navigating, so
+                                        // templates/filter selections survive the round-trip
+                                        viewModel.saveConfig(refPkg, AppScopeConfig(
+                                            useWhitelist = useWhitelist,
+                                            aggressiveFilter = aggressiveFilter,
+                                            excludeSystemApps = excludeSystem,
+                                            enabledTemplates = enabledTemplates.toList(),
+                                            extraAppList = extraPackages
+                                        ))
+                                        onExtraAppListClick(refPkg, extraPackages)
+                                    }) {
                                         Text(stringResource(R.string.config_select_extra))
                                     }
                                 }

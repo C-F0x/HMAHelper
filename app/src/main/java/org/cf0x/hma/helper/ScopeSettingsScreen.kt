@@ -129,7 +129,7 @@ fun ScopeSettingsScreen(
 }
 
 @Composable
-private fun ModeGroupCard(
+internal fun ModeGroupCard(
     modeLabel: String,
     labelColor: androidx.compose.ui.graphics.Color,
     bgColor: androidx.compose.ui.graphics.Color,

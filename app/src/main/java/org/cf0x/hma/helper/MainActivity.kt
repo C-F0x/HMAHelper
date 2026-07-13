@@ -82,6 +82,7 @@ fun AppNavigation(appSettings: AppSettings) {
         composable("main") {
             MainScreen(
                 appSettings = appSettings,
+                appManagerVM = appManagerVM,
                 onSettingsClick = {
                     navController.navigate("settings")
                 },
@@ -171,6 +172,7 @@ fun AppNavigation(appSettings: AppSettings) {
         composable("scope_select") {
             AppManagerScreen(
                 viewModel = appManagerVM,
+                titleRes = R.string.app_manager_title,
                 onBackClick = { navController.popBackStack() },
                 onExtraConfirm = { selected ->
                     val pkgsStr = selected.joinToString(",")
@@ -222,6 +224,7 @@ fun AppNavigation(appSettings: AppSettings) {
         composable("template_app_select") {
             AppManagerScreen(
                 viewModel = appManagerVM,
+                titleRes = R.string.app_manager_title,
                 onBackClick = { navController.popBackStack() },
                 onExtraConfirm = { selected ->
                     navController.previousBackStackEntry?.savedStateHandle?.set("template_apps", selected)

@@ -31,6 +31,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -863,7 +864,7 @@ private fun ActionCard(
     onClick: () -> Unit
 ) {
     ElevatedCard(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier.clip(MaterialTheme.shapes.extraLarge).clickable(onClick = onClick),
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
@@ -909,6 +910,7 @@ private fun PresetBlock(
     Card(
         modifier = modifier
             .height(120.dp)
+            .clip(MaterialTheme.shapes.extraLarge)
             .clickable { onClick() },
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
@@ -954,7 +956,7 @@ private fun SettingsEntry(
     onClick: () -> Unit
 ) {
     Surface(
-        modifier = modifier.fillMaxWidth().clickable { onClick() },
+        modifier = modifier.fillMaxWidth().clip(MaterialTheme.shapes.extraLarge).clickable { onClick() },
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
