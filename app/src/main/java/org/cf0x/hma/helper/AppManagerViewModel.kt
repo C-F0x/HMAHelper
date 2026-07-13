@@ -11,6 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.cf0x.hma.helper.data.dataStore
+import org.cf0x.hma.helper.preset.PresetManager
 
 data class AppInfo(
     val packageName: String,
@@ -47,7 +48,28 @@ data class AppScopeConfig(
     }
 }
 
+data class Template(
+    val name: String,
+    val isWhitelist: Boolean = false,
+    val appList: List<String> = emptyList()
+) {
+    fun encode(): String = "$name|$isWhitelist|${appList.joinToString(",")}"
+
+    companion object {
+        fun decode(data: String): Template {
+            val parts = data.split("|", limit = 3)
+            if (parts.size < 3) return Template(name = "")
+            return Template(
+                name = parts[0],
+                isWhitelist = parts[1].toBooleanStrictOrNull() ?: false,
+                appList = parts[2].split(",").filter { it.isNotBlank() }
+            )
+        }
+    }
+}
+
 private val SCOPE_CONFIGS_KEY = stringPreferencesKey("scope_configs")
+private val TEMPLATES_KEY = stringPreferencesKey("templates")
 
 class AppManagerViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -56,6 +78,7 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
     private val _searchQuery = MutableStateFlow("")
     private val _selectedPackages = MutableStateFlow<Set<String>>(emptySet())
     private val _scopeConfigs = MutableStateFlow<Map<String, AppScopeConfig>>(emptyMap())
+    private val _templates = MutableStateFlow<List<Template>>(emptyList())
 
     val allApps: StateFlow<List<AppInfo>> = _allApps.asStateFlow()
     val selectedTab: StateFlow<Int> = _selectedTab.asStateFlow()
@@ -65,11 +88,12 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope, SharingStarted.WhileSubscribed(5000), 0
     )
     val scopeConfigs: StateFlow<Map<String, AppScopeConfig>> = _scopeConfigs.asStateFlow()
+    val templates: StateFlow<List<Template>> = _templates.asStateFlow()
 
     // Reactive filtered list
     val filteredApps: StateFlow<List<AppInfo>> = combine(
-        _allApps, _selectedTab, _searchQuery
-    ) { apps, tab, query ->
+        _allApps, _selectedTab, _searchQuery, _selectedPackages
+    ) { apps, tab, query, selected ->
         val q = query.lowercase().trim()
         val isUserTab = tab == TAB_USER
         apps.filter { app ->
@@ -77,7 +101,10 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
             tabMatch && (q.isEmpty() ||
                     app.packageName.lowercase().contains(q) ||
                     app.appLabel.lowercase().contains(q))
-        }
+        }.sortedWith(
+            compareByDescending<AppInfo> { it.packageName in selected }
+                .thenBy { it.appLabel.lowercase() }
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     companion object {
@@ -88,6 +115,7 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
     init {
         reload()
         loadScopeConfigs()
+        loadTemplates()
     }
 
     fun setSelectedTab(tab: Int) { _selectedTab.value = tab }
@@ -102,6 +130,7 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
 
     fun isSelected(packageName: String): Boolean = packageName in _selectedPackages.value
     fun clearSelection() { _selectedPackages.value = emptySet() }
+    fun setSelection(packages: List<String>) { _selectedPackages.value = packages.toSet() }
     fun lastSelectedPackage(): String? = _selectedPackages.value.lastOrNull()
 
     fun getConfig(packageName: String): AppScopeConfig? = _scopeConfigs.value[packageName]
@@ -109,6 +138,44 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
     fun saveConfig(packageName: String, config: AppScopeConfig) {
         _scopeConfigs.value = _scopeConfigs.value + (packageName to config)
         persistScopeConfigs()
+    }
+
+    fun removeConfig(packageName: String) {
+        _scopeConfigs.value = _scopeConfigs.value - packageName
+        persistScopeConfigs()
+    }
+
+    // ── Template Management ──
+
+    fun getTemplates(): List<Template> = _templates.value
+
+    fun addTemplate(template: Template) {
+        _templates.value = _templates.value + template
+        persistTemplates()
+    }
+
+    fun removeTemplate(name: String) {
+        _templates.value = _templates.value.filter { it.name != name }
+        persistTemplates()
+    }
+
+    fun updateTemplate(oldName: String, newTemplate: Template) {
+        _templates.value = _templates.value.map { if (it.name == oldName) newTemplate else it }
+        persistTemplates()
+    }
+
+    /** Returns the set of reserved template names: preset internal IDs + display labels (EN/CN) + existing templates */
+    fun getReservedNames(): Set<String> {
+        val enLabels = setOf(
+            "Xposed Modules", "Embedded Xposed", "Managers",
+            "Privileged Apps", "Custom ROM", "Accessibility Services"
+        )
+        val cnLabels = setOf(
+            "Xposed 模块", "内嵌 Xposed 软件", "管理器",
+            "特权软件", "自定义 ROM", "无障碍服务软件"
+        )
+        val existing = _templates.value.map { it.name }.toSet()
+        return PresetManager.PRESET_NAMES.toSet() + enLabels + cnLabels + existing
     }
 
     // ── Persistence ──
@@ -146,12 +213,38 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
+    private fun loadTemplates() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>()
+            val raw = context.dataStore.data.map { prefs ->
+                prefs[TEMPLATES_KEY] ?: ""
+            }.first()
+            val list = mutableListOf<Template>()
+            if (raw.isNotBlank()) {
+                raw.split("\n").filter { it.isNotBlank() }.forEach { line ->
+                    val t = Template.decode(line)
+                    if (t.name.isNotBlank()) list.add(t)
+                }
+            }
+            _templates.value = list
+        }
+    }
+
+    private fun persistTemplates() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val context = getApplication<Application>()
+            val raw = _templates.value.joinToString("\n") { it.encode() }
+            context.dataStore.edit { prefs ->
+                prefs[TEMPLATES_KEY] = raw
+            }
+        }
+    }
+
     fun reload() {
         viewModelScope.launch(Dispatchers.IO) {
             val pm = getApplication<Application>().packageManager
             val apps = runCatching {
                 pm.getInstalledApplications(PackageManager.GET_META_DATA)
-                    .mapNotNull { it ?: return@mapNotNull null }
                     .map { appInfo ->
                         val label = runCatching {
                             pm.getApplicationLabel(appInfo).toString()

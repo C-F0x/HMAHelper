@@ -1,5 +1,7 @@
 package org.cf0x.hma.helper
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -7,6 +9,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,15 +21,16 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.outlined.Colorize
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Palette
-import androidx.compose.material.icons.outlined.RoundedCorner
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -83,7 +87,7 @@ fun SettingsScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.desc_back)
                         )
                     }
                 }
@@ -98,6 +102,11 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // --- Group: About ---
+            SettingGroup {
+                AboutItem(context)
+            }
+
             // --- Group: Theme Color & Style ---
             SettingGroup {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -132,7 +141,7 @@ fun SettingsScreen(
 
                     AnimatedVisibility(visible = colorSource == ColorSource.PRESET && !showPicker, enter = fadeIn(), exit = fadeOut()) {
                         Row(
-                            modifier = Modifier.fillMaxWidth().clickable { showPicker = true },
+                            modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).clickable { showPicker = true },
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
@@ -228,7 +237,7 @@ private fun PaletteStyleItem(current: PaletteStyle, onSelect: (PaletteStyle) -> 
 
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
-            Modifier.fillMaxWidth().clickable { expanded = !expanded },
+            Modifier.fillMaxWidth().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = !expanded },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -266,6 +275,7 @@ private fun PaletteStyleItem(current: PaletteStyle, onSelect: (PaletteStyle) -> 
                     Row(
                         Modifier
                             .fillMaxWidth()
+                            .clip(MaterialTheme.shapes.small)
                             .clickable { expanded = false; onSelect(style) }
                             .padding(vertical = 10.dp, horizontal = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -294,7 +304,7 @@ private fun LanguageItem(appSettings: AppSettings, appLocale: AppLocale) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { expanded = !expanded },
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { expanded = !expanded },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
@@ -312,7 +322,7 @@ private fun LanguageItem(appSettings: AppSettings, appLocale: AppLocale) {
                 )
                 if (!expanded) {
                     Text(
-                        options.firstOrNull { it.second == appLocale }?.first ?: stringResource(R.string.setting_language_en),
+                        options.firstOrNull { it.second == appLocale }?.first ?: stringResource(R.string.setting_language_system),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -333,7 +343,7 @@ private fun LanguageItem(appSettings: AppSettings, appLocale: AppLocale) {
         ) {
             Column(modifier = Modifier.padding(top = 12.dp)) {
                 options.forEach { (label, value) ->
-                    Row(Modifier.fillMaxWidth().clickable { pending = value }.padding(vertical = 12.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).clickable { pending = value }.padding(vertical = 12.dp, horizontal = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         RadioButton(selected = pending == value, onClick = { pending = value })
                         Text(label, style = MaterialTheme.typography.bodyLarge)
                     }
@@ -352,3 +362,70 @@ private fun LanguageItem(appSettings: AppSettings, appLocale: AppLocale) {
         }
     }
 }
+
+@Composable
+private fun AboutItem(context: android.content.Context) {
+    val versionName = runCatching {
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName
+    }.getOrNull() ?: "?"
+
+    val openGitHub: () -> Unit = {
+        runCatching {
+            context.startActivity(
+                Intent(Intent.ACTION_VIEW, Uri.parse(context.getString(R.string.github_url)))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+        }
+    }
+
+    Column(
+        modifier = Modifier.clickable { openGitHub() }
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Surface(
+                    modifier = Modifier.size(48.dp),
+                    shape = MaterialTheme.shapes.large,
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_launcher_foreground),
+                        contentDescription = null,
+                        modifier = Modifier.padding(6.dp)
+                    )
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        text = versionName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = stringResource(R.string.github_author),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+

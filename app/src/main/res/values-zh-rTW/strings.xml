@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_settings">設定</string>
+    <string name="version_compat_label">適配版本: %s</string>
+    <string name="system_status">系統狀態</string>
+    <string name="status_operational">運行中</string>
+    <string name="main_status_title">狀態概覽</string>
+    <string name="main_total_apps">Template Apps: %d</string>
+    <string name="main_scope_count">Scope: %d</string>
+    <string name="main_import">匯入</string>
+    <string name="main_export">匯出</string>
+    <string name="main_smart_classify">智慧分類</string>
+    <string name="main_scope_settings">作用域設定</string>
+    <string name="main_template_settings">模板設定</string>
+    <string name="dialog_title_import">匯入配置</string>
+    <string name="dialog_title_export">匯出配置</string>
+    <string name="dialog_message_import">從裝置匯入 JSON 配置文件。</string>
+    <string name="dialog_message_export">將當前配置匯出為 JSON 文件。</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="config_enable_hide">啟用隱藏</string>
+    <string name="config_work_mode">工作模式</string>
+    <string name="config_blacklist">黑名單</string>
+    <string name="config_whitelist">白名單</string>
+    <string name="config_exclude_system">排除系統應用</string>
+    <string name="config_aggressive_filter">激進意圖過濾</string>
+    <string name="config_templates_header">已啟用 %d 個模板</string>
+    <string name="config_extra_apps">額外包名列表</string>
+    <string name="nav_app_config">應用配置</string>
+    <string name="main_app_manager">軟體管理</string>
+    <string name="main_extra_app_select">選擇額外包名</string>
+    <string name="main_template_create">建立模板</string>
+    <string name="app_manager_search">搜尋應用…</string>
+    <string name="app_manager_tab_user">使用者</string>
+    <string name="app_manager_tab_system">系統</string>
+    <string name="setting_language">界面語言</string>
+    <string name="setting_language_system">系統預設</string>
+    <string name="setting_theme_mode">主题模式</string>
+    <string name="setting_theme_system">跟隨系統</string>
+    <string name="setting_theme_light">淺色</string>
+    <string name="setting_theme_dark">深色</string>
+    <string name="setting_color_source">顏色來源</string>
+    <string name="setting_color_system">系統強調色</string>
+    <string name="setting_color_custom">自訂取色</string>
+    <string name="setting_palette_style">取色方案</string>
+    <string name="setting_palette_style_tonalspot">Tonal Spot</string>
+    <string name="setting_palette_style_neutral">Neutral</string>
+    <string name="setting_palette_style_vibrant">Vibrant</string>
+    <string name="setting_palette_style_expressive">Expressive</string>
+    <string name="setting_palette_style_monochrome">Monochrome</string>
+    <string name="setting_palette_style_fidelity">Fidelity</string>
+    <string name="setting_palette_style_rainbow">Rainbow</string>
+    <string name="card_add_confirm">確認</string>
+    <string name="card_add_cancel">取消</string>
+    <string name="preset_refresh">重新整理</string>
+    <string name="preset_app_count">%d 個應用</string>
+    <string name="preset_empty">未檢測到相關應用</string>
+    <string name="preset_name_xposed">Xposed 模組</string>
+    <string name="preset_name_embedded_xposed">內嵌 Xposed 軟體</string>
+    <string name="preset_name_managers">管理器</string>
+    <string name="preset_name_privileged_apps">特權軟體</string>
+    <string name="preset_name_custom_rom">自訂 ROM</string>
+    <string name="preset_name_accessibility_apps">無障礙服務軟體</string>
+    <string name="preset_subtitle_xposed">透過 manifest metadata 標記識別</string>
+    <string name="preset_subtitle_embedded_xposed">檢測清單標記及原生 Hook 庫</string>
+    <string name="preset_subtitle_managers">關鍵字匹配各類管理器應用</string>
+    <string name="preset_subtitle_privileged_apps">透過 ADB / Root 提權的框架</string>
+    <string name="preset_subtitle_custom_rom">匹配系統路徑和包名特徵</string>
+    <string name="preset_subtitle_accessibility_apps">檢測無障礙服務聲明應用</string>
+    <string name="preset_count_suffix">%d 個</string>
+    <string name="preset_not_installed">未安裝</string>
+
+    <!-- Scope -->
+    <string name="scope_empty">暫無作用域配置，點擊 + 添加。</string>
+    <string name="scope_config_summary">%1$d 個模板 · %2$d 個額外應用</string>
+    <string name="scope_config_extra_count">%d 個額外應用</string>
+    <string name="scope_mode_whitelist">白名單</string>
+    <string name="scope_mode_blacklist">黑名單</string>
+
+    <!-- Template -->
+    <string name="template_name">模板名稱</string>
+    <string name="template_name_empty">名稱不能為空</string>
+    <string name="template_name_duplicate">名稱已存在</string>
+    <string name="template_app_list">應用列表</string>
+    <string name="template_no_apps">未選擇應用</string>
+    <string name="template_created">模板已建立</string>
+    <string name="template_updated">模板已更新</string>
+    <string name="template_empty">暫無模板，點擊 + 建立。</string>
+    <string name="template_app_count">%d 個應用</string>
+    <string name="template_delete_title">刪除模板</string>
+    <string name="template_delete_message">刪除模板 "%s"？</string>
+    <string name="template_delete_button">刪除</string>
+
+    <!-- App manager -->
+    <string name="app_auto_removed">已自動移除: %s</string>
+
+    <!-- Config editing -->
+    <string name="config_editing_count">編輯 %d 個應用</string>
+    <string name="config_select_extra">選擇</string>
+    <string name="config_no_extra_apps">未選擇額外應用</string>
+    <string name="config_save_title">儲存配置</string>
+    <string name="config_save_message">將此配置應用於 %d 個應用？</string>
+    <string name="config_delete_title">刪除配置</string>
+    <string name="config_delete_message">刪除 %d 個應用的配置？</string>
+    <string name="config_delete_button">刪除</string>
+
+    <!-- Language display names -->
+
+    <!-- Accessibility -->
+    <string name="desc_collapse">收起</string>
+    <string name="desc_expand">展開</string>
+    <string name="desc_back">返回</string>
+    <string name="desc_save">儲存</string>
+    <string name="desc_delete">刪除</string>
+    <string name="desc_config">配置</string>
+    <string name="desc_selected">已選取</string>
+    <string name="desc_add">新增</string>
+    <string name="desc_create_template">建立模板</string>
+</resources>

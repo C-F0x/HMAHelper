@@ -67,8 +67,8 @@ fun AppManagerScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = if (onExtraConfirm != null) "Select Extra Apps"
-                        else stringResource(R.string.nav_app_manager),
+                        text = if (onExtraConfirm != null) stringResource(R.string.main_extra_app_select)
+                        else stringResource(R.string.app_manager_title),
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -79,19 +79,19 @@ fun AppManagerScreen(
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.desc_back)
                         )
                     }
                 },
                 actions = {
-                    if (selectedCount > 0) {
+                    if (selectedCount > 0 || onExtraConfirm != null) {
                         if (onExtraConfirm != null) {
                             val allAppNames = remember(allApps) { allApps.map { it.packageName }.toSet() }
                             IconButton(onClick = {
                                 val removed = selectedPackages.filter { it !in allAppNames }
                                 if (removed.isNotEmpty()) {
                                     Toast.makeText(context,
-                                        "Auto-removed: ${removed.joinToString(", ")}",
+                                        context.getString(R.string.app_auto_removed, removed.joinToString(", ")),
                                         Toast.LENGTH_LONG).show()
                                 }
                                 val valid = selectedPackages.filter { it in allAppNames }
@@ -110,7 +110,7 @@ fun AppManagerScreen(
                             }) {
                                 Icon(
                                     imageVector = Icons.Filled.Settings,
-                                    contentDescription = "Config"
+                                    contentDescription = stringResource(R.string.desc_config)
                                 )
                             }
                         }
@@ -307,8 +307,8 @@ private fun BigPillToggle(
                 ) {
                     Text(
                         text = label,
-                        fontSize = 16.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                         color = if (isSelected)
                             MaterialTheme.colorScheme.onSecondaryContainer
                         else
@@ -417,7 +417,7 @@ private fun AppListItem(
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
-                                    contentDescription = "Selected",
+                                    contentDescription = stringResource(R.string.desc_selected),
                                     tint = Color.White,
                                     modifier = Modifier.size(22.dp)
                                 )

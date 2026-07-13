@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_settings">Paramètres</string>
+    <string name="version_compat_label">Version compatible: %s</string>
+    <string name="system_status">État du système</string>
+    <string name="status_operational">Opérationnel</string>
+    <string name="main_status_title">Aperçu</string>
+    <string name="main_total_apps">Apps modèles : %d</string>
+    <string name="main_scope_count">Apps de portée : %d</string>
+    <string name="main_import">Importer</string>
+    <string name="main_export">Exporter</string>
+    <string name="main_smart_classify">Classification intelligente</string>
+    <string name="main_scope_settings">Paramètres de portée</string>
+    <string name="main_template_settings">Paramètres des modèles</string>
+    <string name="dialog_title_import">Importer la configuration</string>
+    <string name="dialog_title_export">Exporter la configuration</string>
+    <string name="dialog_message_import">Importer un fichier JSON de configuration depuis l\'appareil.</string>
+    <string name="dialog_message_export">Exporter la configuration actuelle en fichier JSON.</string>
+    <string name="dialog_cancel">Annuler</string>
+
+    <!-- Scope -->
+    <string name="scope_empty">Aucune configuration de portée. Appuyez sur + pour en ajouter une.</string>
+    <string name="scope_config_summary">%1$d modèles · %2$d apps supplémentaires</string>
+    <string name="scope_config_extra_count">%d applications supplémentaires</string>
+    <string name="scope_mode_whitelist">Liste blanche</string>
+    <string name="scope_mode_blacklist">Liste noire</string>
+
+    <!-- Template -->
+    <string name="template_name">Nom du modèle</string>
+    <string name="template_name_empty">Le nom ne peut pas être vide</string>
+    <string name="template_name_duplicate">Nom déjà utilisé</string>
+    <string name="template_app_list">Liste d\'applications</string>
+    <string name="template_no_apps">Aucune application sélectionnée</string>
+    <string name="template_created">Modèle créé</string>
+    <string name="template_updated">Modèle mis à jour</string>
+    <string name="template_empty">Aucun modèle. Appuyez sur + pour en créer un.</string>
+    <string name="template_app_count">%d applications</string>
+    <string name="template_delete_title">Supprimer le modèle</string>
+    <string name="template_delete_message">Supprimer le modèle &quot;%s&quot; ?</string>
+    <string name="template_delete_button">Supprimer</string>
+
+    <!-- App manager -->
+    <string name="app_auto_removed">Auto-supprimé : %s</string>
+
+    <!-- Config -->
+    <string name="config_enable_hide">Activer le masquage</string>
+    <string name="config_work_mode">Mode de travail</string>
+    <string name="config_blacklist">Liste noire</string>
+    <string name="config_whitelist">Liste blanche</string>
+    <string name="config_exclude_system">Exclure les applications système</string>
+    <string name="config_aggressive_filter">Filtre d\'intention agressif</string>
+    <string name="config_templates_header">%d modèles activés</string>
+    <string name="config_extra_apps">Liste d\'apps supplémentaires</string>
+    <string name="config_editing_count">Édition de %d applications</string>
+    <string name="config_select_extra">Sélectionner</string>
+    <string name="config_no_extra_apps">Aucune application supplémentaire sélectionnée</string>
+    <string name="config_save_title">Enregistrer la configuration</string>
+    <string name="config_save_message">Appliquer cette configuration à %d application(s) ?</string>
+    <string name="config_delete_title">Supprimer la configuration</string>
+    <string name="config_delete_message">Supprimer la configuration de %d application(s) ?</string>
+    <string name="config_delete_button">Supprimer</string>
+    <string name="nav_app_config">Configuration de l\'app</string>
+
+    <string name="main_app_manager">Gestionnaire d\'apps</string>
+    <string name="main_extra_app_select">Sélectionner des apps supplémentaires</string>
+    <string name="main_template_create">Créer un modèle</string>
+    <string name="app_manager_search">Rechercher des apps…</string>
+    <string name="app_manager_tab_user">Utilisateur</string>
+    <string name="app_manager_tab_system">Système</string>
+
+    <string name="setting_language">Langue</string>
+    <string name="setting_language_system">Par défaut du système</string>
+
+    <string name="setting_theme_mode">Mode thème</string>
+    <string name="setting_theme_system">Par défaut du système</string>
+    <string name="setting_theme_light">Clair</string>
+    <string name="setting_theme_dark">Sombre</string>
+
+    <string name="setting_color_source">Source de couleur</string>
+    <string name="setting_color_system">Accent système</string>
+    <string name="setting_color_custom">Choix personnalisé</string>
+
+    <string name="setting_palette_style">Style de palette</string>
+    <string name="setting_palette_style_tonalspot">Tonal Spot</string>
+    <string name="setting_palette_style_neutral">Neutral</string>
+    <string name="setting_palette_style_vibrant">Vibrant</string>
+    <string name="setting_palette_style_expressive">Expressive</string>
+    <string name="setting_palette_style_monochrome">Monochrome</string>
+    <string name="setting_palette_style_fidelity">Fidelity</string>
+    <string name="setting_palette_style_rainbow">Rainbow</string>
+
+    <string name="card_add_confirm">Confirmer</string>
+    <string name="card_add_cancel">Annuler</string>
+
+    <string name="preset_refresh">Actualiser</string>
+    <string name="preset_app_count">%d apps</string>
+    <string name="preset_empty">Aucune application détectée</string>
+
+    <!-- Preset names -->
+    <string name="preset_name_xposed">Modules Xposed</string>
+    <string name="preset_name_embedded_xposed">Xposed intégré</string>
+    <string name="preset_name_managers">Gestionnaires</string>
+    <string name="preset_name_privileged_apps">Applications privilégiées</string>
+    <string name="preset_name_custom_rom">ROM personnalisée</string>
+    <string name="preset_name_accessibility_apps">Services d\'accessibilité</string>
+
+    <!-- Preset subtitles -->
+    <string name="preset_subtitle_xposed">Identifié via les métadonnées du manifeste</string>
+    <string name="preset_subtitle_embedded_xposed">Détecté via les marques du manifeste et les bibliothèques Hook natives</string>
+    <string name="preset_subtitle_managers">Applications gestionnaires correspondant aux mots-clés</string>
+    <string name="preset_subtitle_privileged_apps">Applications élevées via ADB / privilèges Root</string>
+    <string name="preset_subtitle_custom_rom">Empreinte du chemin système et du nom du package</string>
+    <string name="preset_subtitle_accessibility_apps">Applications déclarant des services d\'accessibilité</string>
+
+    <string name="preset_count_suffix">%d apps</string>
+    <string name="preset_not_installed">Non installé</string>
+
+    <!-- Accessibility -->
+    <string name="desc_collapse">Réduire</string>
+    <string name="desc_expand">Développer</string>
+    <string name="desc_back">Retour</string>
+    <string name="desc_save">Enregistrer</string>
+    <string name="desc_delete">Supprimer</string>
+    <string name="desc_config">Configuration</string>
+    <string name="desc_selected">Sélectionné</string>
+    <string name="desc_add">Ajouter</string>
+    <string name="desc_create_template">Créer un modèle</string>
+</resources>

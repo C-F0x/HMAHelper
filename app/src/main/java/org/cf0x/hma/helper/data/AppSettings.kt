@@ -44,6 +44,11 @@ class AppSettings(private val context: Context) {
         val PRESET_COLOR       = intPreferencesKey("preset_color")
         val APP_LOCALE         = stringPreferencesKey("app_locale")
         val PALETTE_STYLE      = stringPreferencesKey("palette_style")
+        val CONFIG_VERSION     = intPreferencesKey("config_version")
+        val DETAIL_LOG         = booleanPreferencesKey("detail_log")
+        val MAX_LOG_SIZE       = intPreferencesKey("max_log_size")
+        val FORCE_MOUNT_DATA   = booleanPreferencesKey("force_mount_data")
+        val AGGRESSIVE_FILTER  = booleanPreferencesKey("aggressive_filter")
     }
 
     val themeMode: Flow<ThemeMode> = context.dataStore.data.map { p ->
@@ -70,8 +75,10 @@ class AppSettings(private val context: Context) {
     private fun detectSystemLocale(): AppLocale {
         val locale = java.util.Locale.getDefault()
         return when (locale.language) {
-            "zh" -> if (locale.country in listOf("TW", "HK", "MO")) AppLocale.ZH_TW
-                    else AppLocale.ZH_CN
+            "zh" -> when (locale.country) {
+                "TW", "HK", "MO" -> AppLocale.ZH_TW
+                else -> AppLocale.ZH_CN
+            }
             "ja" -> AppLocale.JA
             "ko" -> AppLocale.KO
             "fr" -> AppLocale.FR
@@ -90,4 +97,32 @@ class AppSettings(private val context: Context) {
     suspend fun savePresetColor(c: Int) = context.dataStore.edit { it[Keys.PRESET_COLOR] = c }
     suspend fun saveAppLocale(l: AppLocale) = context.dataStore.edit { it[Keys.APP_LOCALE] = l.tag }
     suspend fun savePaletteStyle(s: PaletteStyle) = context.dataStore.edit { it[Keys.PALETTE_STYLE] = s.name }
+
+    // ── Misc config ──
+
+    val configVersion: Flow<Int> = context.dataStore.data.map { p ->
+        p[Keys.CONFIG_VERSION] ?: 93
+    }
+
+    val detailLog: Flow<Boolean> = context.dataStore.data.map { p ->
+        p[Keys.DETAIL_LOG] ?: false
+    }
+
+    val maxLogSize: Flow<Int> = context.dataStore.data.map { p ->
+        p[Keys.MAX_LOG_SIZE] ?: 512
+    }
+
+    val forceMountData: Flow<Boolean> = context.dataStore.data.map { p ->
+        p[Keys.FORCE_MOUNT_DATA] ?: true
+    }
+
+    val aggressiveFilter: Flow<Boolean> = context.dataStore.data.map { p ->
+        p[Keys.AGGRESSIVE_FILTER] ?: false
+    }
+
+    suspend fun saveConfigVersion(v: Int)    = context.dataStore.edit { it[Keys.CONFIG_VERSION] = v }
+    suspend fun saveDetailLog(v: Boolean)    = context.dataStore.edit { it[Keys.DETAIL_LOG] = v }
+    suspend fun saveMaxLogSize(v: Int)       = context.dataStore.edit { it[Keys.MAX_LOG_SIZE] = v }
+    suspend fun saveForceMountData(v: Boolean)= context.dataStore.edit { it[Keys.FORCE_MOUNT_DATA] = v }
+    suspend fun saveAggressiveFilter(v: Boolean)= context.dataStore.edit { it[Keys.AGGRESSIVE_FILTER] = v }
 }

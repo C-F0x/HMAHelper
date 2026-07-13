@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,16 +14,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.cf0x.hma.helper.preset.PresetManager
+import kotlinx.coroutines.flow.dropWhile
+import kotlinx.coroutines.flow.first
 import org.cf0x.hma.helper.ui.components.SegmentSwitch
 
 // ─────────────────────────────────────────────────
@@ -51,56 +56,53 @@ fun AppConfigScreen(
     var enabledTemplates by remember { mutableStateOf<Set<String>>(emptySet()) }
     var extraPackages by remember { mutableStateOf<List<String>>(emptyList()) }
     var showSaveDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
-    // Load existing config on first composition (single-select only)
-    val configLoaded = remember { mutableStateOf(false) }
+    val presetContext = LocalContext.current
+
+    // Load existing config — wait for DataStore to supply scopeConfigs first
     LaunchedEffect(refPkg) {
-        if (!isMultiEdit && refPkg.isNotBlank() && !configLoaded.value) {
-            val existing = scopeConfigs[refPkg]
-            if (existing != null) {
-                enableHide = existing.useWhitelist || existing.aggressiveFilter ||
-                        existing.excludeSystemApps != true ||
-                        existing.enabledTemplates.isNotEmpty() ||
-                        existing.extraAppList.isNotEmpty()
-                useWhitelist = existing.useWhitelist
-                excludeSystem = existing.excludeSystemApps
-                aggressiveFilter = existing.aggressiveFilter
-                enabledTemplates = existing.enabledTemplates.toSet()
-                extraPackages = existing.extraAppList
-            }
-            configLoaded.value = true
+        if (!isMultiEdit && refPkg.isNotBlank()) {
+            snapshotFlow { scopeConfigs[refPkg] }
+                .dropWhile { it == null && scopeConfigs.isEmpty() }
+                .first()
+                ?.let { existing ->
+                    enableHide = existing.useWhitelist || existing.aggressiveFilter ||
+                            existing.excludeSystemApps != true ||
+                            existing.enabledTemplates.isNotEmpty() ||
+                            existing.extraAppList.isNotEmpty()
+                    useWhitelist = existing.useWhitelist
+                    excludeSystem = existing.excludeSystemApps
+                    aggressiveFilter = existing.aggressiveFilter
+                    enabledTemplates = existing.enabledTemplates.map { name ->
+                        val preset = PresetNaming.PRESETS.find { it.id == name }
+                        if (preset != null) PresetNaming.toPrefixedName(presetContext, preset.id, existing.useWhitelist) else name
+                    }.toSet()
+                    extraPackages = existing.extraAppList
+                }
         }
     }
 
     // Watch for extraPackages updates from shared ViewModel (e.g. after ExtraAppListScreen)
     val refConfig = scopeConfigs[refPkg]
     LaunchedEffect(refConfig) {
-        if (refConfig != null && configLoaded.value) {
+        if (refConfig != null) {
             extraPackages = refConfig.extraAppList
         }
     }
 
-    // PresetManager template names
-    val blacklistTemplates = remember {
-        PresetManager.PRESET_NAMES.map { TemplateItem(it, isWhitelist = false) }
-    }
-    val whitelistTemplates = remember {
-        listOf(
-            TemplateItem("privileged_apps", isWhitelist = true)
-        )
-    }
-
-    // Clear selected templates when switching work mode
-    val prevUseWhitelist = remember { mutableStateOf(useWhitelist) }
-    LaunchedEffect(useWhitelist) {
-        if (useWhitelist != prevUseWhitelist.value) {
-            enabledTemplates = emptySet()
-            prevUseWhitelist.value = useWhitelist
+    // Preset templates (12: 6 blacklist + 6 whitelist, prefixed)
+    val presetTemplates = remember(presetContext) {
+        PresetNaming.PRESETS.flatMap { p ->
+            val label = presetContext.getString(p.labelRes)
+            listOf(
+                TemplateItem("${PresetNaming.PREFIX}${label}", p.labelRes, R.string.scope_mode_blacklist),
+                TemplateItem("${PresetNaming.PREFIX}${label}_whitelist", p.labelRes, R.string.scope_mode_whitelist)
+            )
         }
     }
-
-    // Templates to display based on current mode
-    val currentTemplates = if (useWhitelist) whitelistTemplates else blacklistTemplates
+    // Custom templates from ViewModel
+    val customTemplates by viewModel.templates.collectAsState()
 
     Scaffold(
         topBar = {
@@ -112,7 +114,7 @@ fun AppConfigScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = if (isMultiEdit) "Editing ${packageNames.size} apps"
+                            text = if (isMultiEdit) stringResource(R.string.config_editing_count, packageNames.size)
                             else refPkg,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -123,7 +125,7 @@ fun AppConfigScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.desc_back)
                         )
                     }
                 },
@@ -131,8 +133,16 @@ fun AppConfigScreen(
                     IconButton(onClick = { showSaveDialog = true }) {
                         Icon(
                             imageVector = Icons.Filled.Save,
-                            contentDescription = "Save"
+                            contentDescription = stringResource(R.string.desc_save)
                         )
+                    }
+                    if (!isMultiEdit) {
+                        IconButton(onClick = { showDeleteDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = stringResource(R.string.desc_delete)
+                            )
+                        }
                     }
                 }
             )
@@ -228,10 +238,10 @@ fun AppConfigScreen(
 
                             HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
 
-                            // 4. Templates (mode-specific)
+                            // 4. Templates (smart classification + custom)
                             Column {
                                 Row(
-                                    modifier = Modifier.fillMaxWidth().clickable { templatesExpanded = !templatesExpanded },
+                                    modifier = Modifier.fillMaxWidth().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { templatesExpanded = !templatesExpanded },
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
@@ -253,32 +263,54 @@ fun AppConfigScreen(
                                     exit = shrinkVertically() + fadeOut()
                                 ) {
                                     Column(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        currentTemplates.forEach { template ->
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth().clickable {
-                                                    enabledTemplates = if (template.name in enabledTemplates)
-                                                        enabledTemplates - template.name
-                                                    else enabledTemplates + template.name
-                                                }.padding(vertical = 8.dp, horizontal = 4.dp),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                            ) {
-                                                Checkbox(
-                                                    checked = template.name in enabledTemplates,
-                                                    onCheckedChange = {
-                                                        enabledTemplates = if (it) enabledTemplates + template.name
-                                                        else enabledTemplates - template.name
+                                        // ── Smart Classification presets ──
+                                        Text(
+                                            text = stringResource(R.string.main_smart_classify),
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                                        )
+                                        presetTemplates.forEach { template ->
+                                            TemplateCheckboxRow(
+                                                name = template.storedName,
+                                                label = { Text(stringResource(template.displayLabelRes), style = MaterialTheme.typography.bodyLarge) },
+                                                subLabel = { Text(stringResource(template.modeLabelRes), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline) },
+                                                checked = template.storedName in enabledTemplates,
+                                                onToggle = {
+                                                    enabledTemplates = if (template.storedName in enabledTemplates)
+                                                        enabledTemplates - template.storedName
+                                                    else enabledTemplates + template.storedName
+                                                }
+                                            )
+                                        }
+
+                                        // ── Custom templates ──
+                                        if (customTemplates.isNotEmpty()) {
+                                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), modifier = Modifier.padding(vertical = 4.dp))
+                                            Text(
+                                                text = stringResource(R.string.main_template_create),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                                            )
+                                            customTemplates.forEach { t ->
+                                                TemplateCheckboxRow(
+                                                    name = t.name,
+                                                    label = { Text(t.name, style = MaterialTheme.typography.bodyLarge) },
+                                                    subLabel = {
+                                                        Text(
+                                                            if (t.isWhitelist) stringResource(R.string.scope_mode_whitelist) else stringResource(R.string.scope_mode_blacklist),
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            color = MaterialTheme.colorScheme.outline
+                                                        )
+                                                    },
+                                                    checked = t.name in enabledTemplates,
+                                                    onToggle = {
+                                                        enabledTemplates = if (t.name in enabledTemplates)
+                                                            enabledTemplates - t.name
+                                                        else enabledTemplates + t.name
                                                     }
                                                 )
-                                                Column {
-                                                    Text(template.displayLabel, style = MaterialTheme.typography.bodyLarge)
-                                                    Text(
-                                                        text = if (template.isWhitelist) "(${stringResource(R.string.config_whitelist)})"
-                                                        else "(${stringResource(R.string.config_blacklist)})",
-                                                        style = MaterialTheme.typography.labelSmall,
-                                                        color = MaterialTheme.colorScheme.outline
-                                                    )
-                                                }
                                             }
                                         }
                                     }
@@ -296,13 +328,13 @@ fun AppConfigScreen(
                                 ) {
                                     Text(stringResource(R.string.config_extra_apps), style = MaterialTheme.typography.bodyLarge)
                                     TextButton(onClick = { onExtraAppListClick(refPkg, extraPackages) }) {
-                                        Text("Select")
+                                        Text(stringResource(R.string.config_select_extra))
                                     }
                                 }
                                 Spacer(modifier = Modifier.height(4.dp))
                                 if (extraPackages.isEmpty()) {
                                     Text(
-                                        text = "No extra apps selected",
+                                        text = stringResource(R.string.config_no_extra_apps),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.outline,
                                         modifier = Modifier.padding(start = 4.dp)
@@ -332,8 +364,8 @@ fun AppConfigScreen(
         AlertDialog(
             onDismissRequest = { showSaveDialog = false },
             shape = MaterialTheme.shapes.extraLarge,
-            title = { Text("Save Config") },
-            text = { Text("Apply this configuration to ${packageNames.size} app(s)?") },
+            title = { Text(stringResource(R.string.config_save_title)) },
+            text = { Text(stringResource(R.string.config_save_message, packageNames.size)) },
             confirmButton = {
                 Button(onClick = {
                     val config = AppScopeConfig(
@@ -357,23 +389,33 @@ fun AppConfigScreen(
             }
         )
     }
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            shape = MaterialTheme.shapes.extraLarge,
+            title = { Text(stringResource(R.string.config_delete_title)) },
+            text = { Text(stringResource(R.string.config_delete_message, packageNames.size)) },
+            confirmButton = {
+                Button(onClick = {
+                    packageNames.forEach { pkg -> viewModel.removeConfig(pkg) }
+                    showDeleteDialog = false
+                    onBackClick()
+                }) { Text(stringResource(R.string.config_delete_button)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.dialog_cancel))
+                }
+            }
+        )
+    }
 }
 
 private data class TemplateItem(
-    val name: String,
-    val isWhitelist: Boolean
-) {
-    val displayLabel: String
-        get() = when (name) {
-            "xposed" -> "Xposed Modules"
-            "embedded_xposed" -> "Embedded Xposed"
-            "managers" -> "Managers"
-            "privileged_apps" -> "Privileged Apps"
-            "custom_rom" -> "Custom ROM"
-            "accessibility_apps" -> "Accessibility Services"
-            else -> name
-        }
-}
+    val storedName: String,
+    val displayLabelRes: Int,
+    val modeLabelRes: Int
+)
 
 @Composable
 private fun SettingLabel(text: String) {
@@ -382,4 +424,25 @@ private fun SettingLabel(text: String) {
         style = MaterialTheme.typography.bodyLarge,
         color = MaterialTheme.colorScheme.onSurface
     )
+}
+
+@Composable
+private fun TemplateCheckboxRow(
+    name: String,
+    label: @Composable () -> Unit,
+    subLabel: @Composable () -> Unit,
+    checked: Boolean,
+    onToggle: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.small).clickable { onToggle() }.padding(vertical = 8.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Checkbox(checked = checked, onCheckedChange = { onToggle() })
+        Column {
+            label()
+            subLabel()
+        }
+    }
 }

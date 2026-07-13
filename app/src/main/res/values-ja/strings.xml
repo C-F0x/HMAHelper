@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_settings">設定</string>
+    <string name="version_compat_label">互換バージョン: %s</string>
+    <string name="system_status">システム状態</string>
+    <string name="status_operational">動作中</string>
+    <string name="main_status_title">概要</string>
+    <string name="main_total_apps">テンプレートアプリ: %d</string>
+    <string name="main_scope_count">スコープアプリ: %d</string>
+    <string name="main_import">インポート</string>
+    <string name="main_export">エクスポート</string>
+    <string name="main_smart_classify">スマート分類</string>
+    <string name="main_scope_settings">スコープ設定</string>
+    <string name="main_template_settings">テンプレート設定</string>
+    <string name="dialog_title_import">設定をインポート</string>
+    <string name="dialog_title_export">設定をエクスポート</string>
+    <string name="dialog_message_import">デバイスからJSON設定ファイルをインポートします。</string>
+    <string name="dialog_message_export">現在の設定をJSONファイルとしてエクスポートします。</string>
+    <string name="dialog_cancel">キャンセル</string>
+    <string name="config_enable_hide">隠蔽を有効化</string>
+    <string name="config_work_mode">動作モード</string>
+    <string name="config_blacklist">ブラックリスト</string>
+    <string name="config_whitelist">ホワイトリスト</string>
+    <string name="config_exclude_system">システムアプリを除外</string>
+    <string name="config_aggressive_filter">積極的インテントフィルター</string>
+    <string name="config_templates_header">有効なテンプレート %d 個</string>
+    <string name="config_extra_apps">追加アプリリスト</string>
+    <string name="nav_app_config">アプリ設定</string>
+    <string name="main_app_manager">アプリ管理</string>
+    <string name="main_extra_app_select">追加アプリを選択</string>
+    <string name="main_template_create">テンプレート作成</string>
+    <string name="app_manager_search">アプリを検索…</string>
+    <string name="app_manager_tab_user">ユーザー</string>
+    <string name="app_manager_tab_system">システム</string>
+    <string name="setting_language">言語</string>
+    <string name="setting_language_system">システムデフォルト</string>
+    <string name="setting_theme_mode">テーマモード</string>
+    <string name="setting_theme_system">システムデフォルト</string>
+    <string name="setting_theme_light">ライト</string>
+    <string name="setting_theme_dark">ダーク</string>
+    <string name="setting_color_source">色のソース</string>
+    <string name="setting_color_system">システムアクセント</string>
+    <string name="setting_color_custom">カスタム選択</string>
+    <string name="setting_palette_style">カラーパレットスタイル</string>
+    <string name="setting_palette_style_tonalspot">Tonal Spot</string>
+    <string name="setting_palette_style_neutral">Neutral</string>
+    <string name="setting_palette_style_vibrant">Vibrant</string>
+    <string name="setting_palette_style_expressive">Expressive</string>
+    <string name="setting_palette_style_monochrome">Monochrome</string>
+    <string name="setting_palette_style_fidelity">Fidelity</string>
+    <string name="setting_palette_style_rainbow">Rainbow</string>
+    <string name="card_add_confirm">確認</string>
+    <string name="card_add_cancel">キャンセル</string>
+    <string name="preset_refresh">更新</string>
+    <string name="preset_app_count">%d アプリ</string>
+    <string name="preset_empty">アプリが見つかりません</string>
+    <string name="preset_name_xposed">Xposed モジュール</string>
+    <string name="preset_name_embedded_xposed">埋め込み Xposed</string>
+    <string name="preset_name_managers">マネージャー</string>
+    <string name="preset_name_privileged_apps">特権アプリ</string>
+    <string name="preset_name_custom_rom">カスタムROM</string>
+    <string name="preset_name_accessibility_apps">アクセシビリティサービス</string>
+    <string name="preset_subtitle_xposed">マニフェストメタデータで識別</string>
+    <string name="preset_subtitle_embedded_xposed">マニフェストマークとネイティブHookライブラリで検出</string>
+    <string name="preset_subtitle_managers">キーワード一致のマネージャーアプリ</string>
+    <string name="preset_subtitle_privileged_apps">ADB/Root権限で昇格したアプリ</string>
+    <string name="preset_subtitle_custom_rom">システムパスとパッケージ名のフィンガープリント</string>
+    <string name="preset_subtitle_accessibility_apps">アクセシビリティサービスを宣言するアプリ</string>
+    <string name="preset_count_suffix">%d 個</string>
+    <string name="preset_not_installed">未インストール</string>
+
+    <!-- Scope -->
+    <string name="scope_empty">スコープ設定がありません。+ をタップして追加。</string>
+    <string name="scope_config_summary">%1$d テンプレート · %2$d 追加アプリ</string>
+    <string name="scope_config_extra_count">%d 追加アプリ</string>
+    <string name="scope_mode_whitelist">ホワイトリスト</string>
+    <string name="scope_mode_blacklist">ブラックリスト</string>
+
+    <!-- Template -->
+    <string name="template_name">テンプレート名</string>
+    <string name="template_name_empty">名前は空にできません</string>
+    <string name="template_name_duplicate">名前は既に使用されています</string>
+    <string name="template_app_list">アプリ一覧</string>
+    <string name="template_no_apps">アプリが選択されていません</string>
+    <string name="template_created">テンプレートを作成しました</string>
+    <string name="template_updated">テンプレートを更新しました</string>
+    <string name="template_empty">テンプレートがありません。+ をタップして作成。</string>
+    <string name="template_app_count">%d アプリ</string>
+    <string name="template_delete_title">テンプレートを削除</string>
+    <string name="template_delete_message">テンプレート "%s" を削除しますか？</string>
+    <string name="template_delete_button">削除</string>
+
+    <!-- App manager -->
+    <string name="app_auto_removed">自動的に削除されました: %s</string>
+
+    <!-- Config editing -->
+    <string name="config_editing_count">%d 個のアプリを編集中</string>
+    <string name="config_select_extra">選択</string>
+    <string name="config_no_extra_apps">追加アプリが選択されていません</string>
+    <string name="config_save_title">設定を保存</string>
+    <string name="config_save_message">この設定を %d 個のアプリに適用しますか？</string>
+    <string name="config_delete_title">設定を削除</string>
+    <string name="config_delete_message">%d 個のアプリの設定を削除しますか？</string>
+    <string name="config_delete_button">削除</string>
+
+    <!-- Language display names -->
+
+    <!-- Accessibility -->
+    <string name="desc_collapse">折りたたむ</string>
+    <string name="desc_expand">展開</string>
+    <string name="desc_back">戻る</string>
+    <string name="desc_save">保存</string>
+    <string name="desc_delete">削除</string>
+    <string name="desc_config">設定</string>
+    <string name="desc_selected">選択済み</string>
+    <string name="desc_add">追加</string>
+    <string name="desc_create_template">テンプレートを作成</string>
+</resources>

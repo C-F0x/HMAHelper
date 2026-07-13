@@ -16,7 +16,8 @@ fun ExtraAppListScreen(
 ) {
     // Pre-select initial packages when the screen opens
     LaunchedEffect(initialSelection) {
-        initialSelection.forEach { viewModel.toggleSelection(it) }
+        viewModel.clearSelection()
+        viewModel.setSelection(initialSelection)
     }
 
     AppManagerScreen(

@@ -70,7 +70,7 @@ fun PresetScreen(
                     IconButton(onClick = { clickBlocked = true; onBackClick() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.desc_back)
                         )
                     }
                 }

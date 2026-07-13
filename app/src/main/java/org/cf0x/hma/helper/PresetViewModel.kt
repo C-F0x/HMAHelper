@@ -3,15 +3,20 @@ package org.cf0x.hma.helper
 import android.app.Application
 import android.content.pm.PackageManager
 import android.util.Log
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import org.cf0x.hma.helper.data.dataStore
 import org.cf0x.hma.helper.preset.PackageScanner
 import org.cf0x.hma.helper.preset.PresetManager
+
+private val SCOPE_CONFIGS_KEY = stringPreferencesKey("scope_configs")
 
 data class PresetAppItem(
     val packageName: String,
@@ -31,6 +36,9 @@ class PresetViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _scopeCount = MutableStateFlow(0)
+    val scopeCount: StateFlow<Int> = _scopeCount.asStateFlow()
 
     val presetNames = PresetManager.PRESET_NAMES
 
@@ -71,6 +79,10 @@ class PresetViewModel(application: Application) : AndroidViewModel(application) 
             // --- Step 6: dedup ---
             val xposedPkgs = presetManager.getPresetPackages("xposed")
             presetManager.removeFromPreset("embedded_xposed", xposedPkgs)
+
+            // --- Step 6.5: load scope config count ---
+            val rawScope = context.dataStore.data.first()[SCOPE_CONFIGS_KEY] ?: ""
+            _scopeCount.value = rawScope.split("\n").count { it.isNotBlank() }
 
             _presetCounts.value = presetManager.getAllPresetCounts()
 

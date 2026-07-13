@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_settings">설정</string>
+    <string name="version_compat_label">호환 버전: %s</string>
+    <string name="system_status">시스템 상태</string>
+    <string name="status_operational">작동 중</string>
+    <string name="main_status_title">개요</string>
+    <string name="main_total_apps">템플릿 앱: %d</string>
+    <string name="main_scope_count">스코프 앱: %d</string>
+    <string name="main_import">가져오기</string>
+    <string name="main_export">내보내기</string>
+    <string name="main_smart_classify">스마트 분류</string>
+    <string name="main_scope_settings">스코프 설정</string>
+    <string name="main_template_settings">템플릿 설정</string>
+    <string name="dialog_title_import">설정 가져오기</string>
+    <string name="dialog_title_export">설정 내보내기</string>
+    <string name="dialog_message_import">기기에서 JSON 설정 파일을 가져옵니다.</string>
+    <string name="dialog_message_export">현재 설정을 JSON 파일로 내보냅니다.</string>
+    <string name="dialog_cancel">취소</string>
+    <string name="config_enable_hide">숨김 활성화</string>
+    <string name="config_work_mode">작업 모드</string>
+    <string name="config_blacklist">블랙리스트</string>
+    <string name="config_whitelist">화이트리스트</string>
+    <string name="config_exclude_system">시스템 앱 제외</string>
+    <string name="config_aggressive_filter">적극적 인텐트 필터</string>
+    <string name="config_templates_header">활성화된 템플릿 %d개</string>
+    <string name="config_extra_apps">추가 앱 목록</string>
+    <string name="nav_app_config">앱 설정</string>
+    <string name="main_app_manager">앱 관리</string>
+    <string name="main_extra_app_select">추가 앱 선택</string>
+    <string name="main_template_create">템플릿 생성</string>
+    <string name="app_manager_search">앱 검색…</string>
+    <string name="app_manager_tab_user">사용자</string>
+    <string name="app_manager_tab_system">시스템</string>
+    <string name="setting_language">언어</string>
+    <string name="setting_language_system">시스템 기본값</string>
+    <string name="setting_theme_mode">테마 모드</string>
+    <string name="setting_theme_system">시스템 기본값</string>
+    <string name="setting_theme_light">라이트</string>
+    <string name="setting_theme_dark">다크</string>
+    <string name="setting_color_source">색상 소스</string>
+    <string name="setting_color_system">시스템 강조색</string>
+    <string name="setting_color_custom">사용자 지정</string>
+    <string name="setting_palette_style">색상 팔레트 스타일</string>
+    <string name="setting_palette_style_tonalspot">Tonal Spot</string>
+    <string name="setting_palette_style_neutral">Neutral</string>
+    <string name="setting_palette_style_vibrant">Vibrant</string>
+    <string name="setting_palette_style_expressive">Expressive</string>
+    <string name="setting_palette_style_monochrome">Monochrome</string>
+    <string name="setting_palette_style_fidelity">Fidelity</string>
+    <string name="setting_palette_style_rainbow">Rainbow</string>
+    <string name="card_add_confirm">확인</string>
+    <string name="card_add_cancel">취소</string>
+    <string name="preset_refresh">새로고침</string>
+    <string name="preset_app_count">%d 앱</string>
+    <string name="preset_empty">앱이 감지되지 않음</string>
+    <string name="preset_name_xposed">Xposed 모듈</string>
+    <string name="preset_name_embedded_xposed">임베디드 Xposed</string>
+    <string name="preset_name_managers">관리자</string>
+    <string name="preset_name_privileged_apps">특권 앱</string>
+    <string name="preset_name_custom_rom">커스텀 ROM</string>
+    <string name="preset_name_accessibility_apps">접근성 서비스</string>
+    <string name="preset_subtitle_xposed">매니페스트 메타데이터로 식별</string>
+    <string name="preset_subtitle_embedded_xposed">매니페스트 마크 및 네이티브 Hook 라이브러리로 감지</string>
+    <string name="preset_subtitle_managers">키워드 일치 관리자 애플리케이션</string>
+    <string name="preset_subtitle_privileged_apps">ADB/Root 권한으로 승격된 앱</string>
+    <string name="preset_subtitle_custom_rom">시스템 경로 및 패키지명 핑거프린트</string>
+    <string name="preset_subtitle_accessibility_apps">접근성 서비스를 선언하는 앱</string>
+    <string name="preset_count_suffix">%d개</string>
+    <string name="preset_not_installed">설치되지 않음</string>
+
+    <!-- Scope -->
+    <string name="scope_empty">범위 구성이 없습니다. +를 탭하여 추가하세요.</string>
+    <string name="scope_config_summary">%1$d 템플릿 · %2$d 추가 앱</string>
+    <string name="scope_config_extra_count">%d개 추가 앱</string>
+    <string name="scope_mode_whitelist">화이트리스트</string>
+    <string name="scope_mode_blacklist">블랙리스트</string>
+
+    <!-- Template -->
+    <string name="template_name">템플릿 이름</string>
+    <string name="template_name_empty">이름은 비워둘 수 없습니다</string>
+    <string name="template_name_duplicate">이미 사용 중인 이름입니다</string>
+    <string name="template_app_list">앱 목록</string>
+    <string name="template_no_apps">선택된 앱이 없습니다</string>
+    <string name="template_created">템플릿이 생성되었습니다</string>
+    <string name="template_updated">템플릿이 업데이트되었습니다</string>
+    <string name="template_empty">템플릿이 없습니다. +를 탭하여 생성하세요.</string>
+    <string name="template_app_count">%d개 앱</string>
+    <string name="template_delete_title">템플릿 삭제</string>
+    <string name="template_delete_message">템플릿 "%s"을(를) 삭제하시겠습니까?</string>
+    <string name="template_delete_button">삭제</string>
+
+    <!-- App manager -->
+    <string name="app_auto_removed">자동 제거됨: %s</string>
+
+    <!-- Config editing -->
+    <string name="config_editing_count">%d개 앱 편집 중</string>
+    <string name="config_select_extra">선택</string>
+    <string name="config_no_extra_apps">추가 앱이 선택되지 않음</string>
+    <string name="config_save_title">구성 저장</string>
+    <string name="config_save_message">이 구성을 %d개 앱에 적용하시겠습니까?</string>
+    <string name="config_delete_title">구성 삭제</string>
+    <string name="config_delete_message">%d개 앱의 구성을 삭제하시겠습니까?</string>
+    <string name="config_delete_button">삭제</string>
+
+    <!-- Language display names -->
+
+    <!-- Accessibility -->
+    <string name="desc_collapse">접기</string>
+    <string name="desc_expand">펼치기</string>
+    <string name="desc_back">뒤로</string>
+    <string name="desc_save">저장</string>
+    <string name="desc_delete">삭제</string>
+    <string name="desc_config">설정</string>
+    <string name="desc_selected">선택됨</string>
+    <string name="desc_add">추가</string>
+    <string name="desc_create_template">템플릿 생성</string>
+</resources>

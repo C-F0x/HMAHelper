@@ -1,24 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HMA 助手</string>
-    <string name="nav_main">仪表盘</string>
     <string name="nav_settings">设置</string>
+    <string name="version_compat_label">适配版本: %s</string>
+
+    <!-- Misc config labels -->
+    <string name="misc_config">杂项配置</string>
+    <string name="misc_config_version">configVersion</string>
+    <string name="misc_detail_log">detailLog</string>
+    <string name="misc_max_log_size">maxLogSize</string>
+    <string name="misc_max_log_size_k">%dK</string>
+    <string name="misc_force_mount_data">forceMountData</string>
+    <string name="misc_aggressive_filter">aggressiveFilter</string>
+    <string name="misc_aggressive_filter_hint">用途未知，安全起见，暂不允许修改</string>
 
     <string name="system_status">系统状态</string>
     <string name="status_operational">运行中</string>
-    <string name="total_taps">总点击数: %d</string>
 
     <string name="main_status_title">状态概览</string>
-    <string name="main_total_apps">Template Apps: %d</string>
-    <string name="main_scope_count">Scope Apps: %d</string>
+    <string name="main_total_apps">模板: 6+%d</string>
+    <string name="main_scope_count">作用域: %d</string>
     <string name="main_import">导入</string>
     <string name="main_export">导出</string>
     <string name="main_smart_classify">智能分类</string>
+    <string name="main_scope_settings">作用域设置</string>
+    <string name="main_template_settings">模板设置</string>
     <string name="dialog_title_import">导入配置</string>
     <string name="dialog_title_export">导出配置</string>
     <string name="dialog_message_import">从设备导入 JSON 配置文件。</string>
     <string name="dialog_message_export">将当前配置导出为 JSON 文件。</string>
+    <string name="dialog_export_saf">SAF 导出</string>
+    <string name="dialog_export_quick">快速导出</string>
+    <string name="dialog_export_quick_done">已导出到共享目录</string>
+    <string name="dialog_import_overwrite">覆盖导入（先清空后导入）</string>
+    <string name="dialog_import_overwrite_hint">智能分类始终覆盖重名配置</string>
+    <string name="dialog_import_preview_title">导入预览</string>
+    <string name="dialog_import_preview_templates">模板: %d</string>
+    <string name="dialog_import_preview_scope">作用域应用: %d</string>
+    <string name="dialog_import_preview_corrupt">配置损坏</string>
+    <string name="dialog_import_confirm">导入</string>
+    <string name="dialog_import_removed_scope">已移除 %d 个不存在的作用域软件</string>
     <string name="dialog_cancel">取消</string>
+
+    <!-- Scope settings -->
+    <string name="scope_empty">暂无作用域配置，点击 + 添加。</string>
+    <string name="scope_config_summary">%1$d 个模板 · %2$d 个额外应用</string>
+    <string name="scope_config_extra_count">%d 个额外应用</string>
+    <string name="scope_config_count">模板: %1$d  额外: %2$d</string>
+    <string name="scope_mode_whitelist">白名单</string>
+    <string name="scope_mode_blacklist">黑名单</string>
+
+    <!-- Template screens -->
+    <string name="template_name">模板名称</string>
+    <string name="template_name_empty">名称不能为空</string>
+    <string name="template_name_duplicate">名称已存在</string>
+    <string name="template_app_list">应用列表</string>
+    <string name="template_no_apps">未选择应用</string>
+    <string name="template_created">模板已创建</string>
+    <string name="template_updated">模板已更新</string>
+    <string name="template_empty">暂无模板，点击 + 创建。</string>
+    <string name="template_app_count">%d 个应用</string>
+    <string name="template_delete_title">删除模板</string>
+    <string name="template_delete_message">删除模板 "%s"？</string>
+    <string name="template_delete_button">删除</string>
+
+    <!-- App manager -->
+    <string name="app_auto_removed">已自动移除: %s</string>
+    <string name="app_manager_title">软件列表</string>
 
     <string name="config_enable_hide">启用隐藏</string>
     <string name="config_work_mode">工作模式</string>
@@ -28,33 +75,33 @@
     <string name="config_aggressive_filter">激进的意图过滤</string>
     <string name="config_templates_header">已启用 %d 个模板</string>
     <string name="config_extra_apps">额外包名列表</string>
+    <string name="config_editing_count">编辑 %d 个应用</string>
+    <string name="config_select_extra">选择</string>
+    <string name="config_no_extra_apps">未选择额外应用</string>
+    <string name="config_save_title">保存配置</string>
+    <string name="config_save_message">将此配置应用于 %d 个应用？</string>
+    <string name="config_delete_title">删除配置</string>
+    <string name="config_delete_message">删除 %d 个应用的配置？</string>
+    <string name="config_delete_button">删除</string>
     <string name="nav_app_config">应用配置</string>
 
     <string name="main_app_manager">软件管理</string>
-    <string name="nav_app_manager">软件管理</string>
+    <string name="main_extra_app_select">选择额外包名</string>
+    <string name="main_template_create">创建模板</string>
     <string name="app_manager_search">搜索应用…</string>
     <string name="app_manager_tab_user">用户</string>
     <string name="app_manager_tab_system">系统</string>
 
     <string name="setting_language">界面语言</string>
     <string name="setting_language_system">系统默认</string>
-    <string name="setting_language_zh">简体中文</string>
-    <string name="setting_language_zh_tw">繁體中文</string>
-    <string name="setting_language_ja">日本語</string>
-    <string name="setting_language_ko">한국어</string>
-    <string name="setting_language_fr">Français</string>
-    <string name="setting_language_system_managed">由系统设置管理</string>
-    <string name="setting_language_en">English</string>
 
-    <string name="setting_theme_mode">深色模式</string>
+    <string name="setting_theme_mode">主题模式</string>
     <string name="setting_theme_system">跟随系统</string>
     <string name="setting_theme_light">浅色</string>
     <string name="setting_theme_dark">深色</string>
 
     <string name="setting_color_source">颜色来源</string>
     <string name="setting_color_system">系统强调色</string>
-    <string name="setting_color_monet">壁纸取色 (Monet)</string>
-    <string name="setting_color_preset">预设颜色</string>
     <string name="setting_color_custom">自定义取色</string>
 
     <string name="setting_palette_style">取色方案</string>
@@ -65,19 +112,13 @@
     <string name="setting_palette_style_monochrome">Monochrome</string>
     <string name="setting_palette_style_fidelity">Fidelity</string>
     <string name="setting_palette_style_rainbow">Rainbow</string>
-    <string name="setting_theme_expressive">灵动模式 (Expressive)</string>
-    <string name="setting_theme_expressive_desc">启用更具表现力的圆角与字体设计。</string>
-
-    <string name="toast_clicked">已点击: %s</string>
 
     <string name="card_add_confirm">确认</string>
     <string name="card_add_cancel">取消</string>
 
     <string name="preset_refresh">刷新</string>
     <string name="preset_app_count">%d 个应用</string>
-    <string name="preset_view_detail">查看 →</string>
     <string name="preset_empty">未检测到相关应用</string>
-    <string name="preset_app_detail">详情</string>
 
     <!-- Preset names -->
     <string name="preset_name_xposed">Xposed 模块</string>
@@ -100,4 +141,15 @@
 
     <!-- Preset detail -->
     <string name="preset_not_installed">未安装</string>
+
+    <!-- Accessibility content descriptions -->
+    <string name="desc_collapse">收起</string>
+    <string name="desc_expand">展开</string>
+    <string name="desc_back">返回</string>
+    <string name="desc_save">保存</string>
+    <string name="desc_delete">删除</string>
+    <string name="desc_config">配置</string>
+    <string name="desc_selected">已选中</string>
+    <string name="desc_add">添加</string>
+    <string name="desc_create_template">创建模板</string>
 </resources>

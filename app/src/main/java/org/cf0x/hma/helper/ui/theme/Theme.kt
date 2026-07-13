@@ -14,10 +14,6 @@ import com.materialkolor.PaletteStyle
 import org.cf0x.hma.helper.data.ColorSource
 import org.cf0x.hma.helper.data.ThemeMode
 
-// MD3 Expressive shapes — default style
-// AppRoundShape is the single consistent round-corner value used across all new UI components
-val AppRoundShape = RoundedCornerShape(12.dp)
-
 private val Shapes = Shapes(
     extraSmall = RoundedCornerShape(4.dp),
     small      = RoundedCornerShape(12.dp),
