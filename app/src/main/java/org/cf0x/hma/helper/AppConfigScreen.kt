@@ -48,7 +48,6 @@ fun AppConfigScreen(
     val refPkg = packageNames.firstOrNull() ?: ""
 
     // ── State ──
-    var enableHide by remember { mutableStateOf(true) }
     var useWhitelist by remember { mutableStateOf(false) }
     var excludeSystem by remember { mutableStateOf(true) }
     var aggressiveFilter by remember { mutableStateOf(false) }
@@ -67,10 +66,6 @@ fun AppConfigScreen(
                 .dropWhile { it == null && scopeConfigs.isEmpty() }
                 .first()
                 ?.let { existing ->
-                    enableHide = existing.useWhitelist || existing.aggressiveFilter ||
-                            existing.excludeSystemApps != true ||
-                            existing.enabledTemplates.isNotEmpty() ||
-                            existing.extraAppList.isNotEmpty()
                     useWhitelist = existing.useWhitelist
                     excludeSystem = existing.excludeSystemApps
                     aggressiveFilter = existing.aggressiveFilter
@@ -164,7 +159,7 @@ fun AppConfigScreen(
         ) {
             Spacer(modifier = Modifier.height(4.dp))
 
-            // ── Enable Hide toggle ──
+            // ── Scope Configuration ──
             ElevatedCard(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.extraLarge,
@@ -173,206 +168,178 @@ fun AppConfigScreen(
                 )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.config_enable_hide),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Switch(
-                            checked = enableHide,
-                            onCheckedChange = { enableHide = it }
-                        )
-                    }
+                    // 1. Work Mode
+                    SettingLabel(stringResource(R.string.config_work_mode))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SegmentSwitch(
+                        options = listOf(
+                            stringResource(R.string.config_blacklist),
+                            stringResource(R.string.config_whitelist)
+                        ),
+                        selectedIndex = if (useWhitelist) 1 else 0,
+                        onSelect = { index ->
+                            val newMode = index == 1
+                            useWhitelist = newMode
+                            // Drop templates that don't match the new mode
+                            enabledTemplates = enabledTemplates.filter { name ->
+                                name.endsWith("_whitelist") == newMode
+                            }.toSet()
+                        }
+                    )
 
+                    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), modifier = Modifier.padding(vertical = 16.dp))
+
+                    // 2. excludeSystemApps (whitelist only)
                     AnimatedVisibility(
-                        visible = enableHide,
+                        visible = useWhitelist,
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut()
                     ) {
-                        Column(
-                            modifier = Modifier.padding(top = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                            // 1. Work Mode
-                            SettingLabel(stringResource(R.string.config_work_mode))
-                            SegmentSwitch(
-                                options = listOf(
-                                    stringResource(R.string.config_blacklist),
-                                    stringResource(R.string.config_whitelist)
-                                ),
-                                selectedIndex = if (useWhitelist) 1 else 0,
-                                onSelect = { index ->
-                                    val newMode = index == 1
-                                    useWhitelist = newMode
-                                    // Drop templates that don't match the new mode
-                                    enabledTemplates = enabledTemplates.filter { name ->
-                                        name.endsWith("_whitelist") == newMode
-                                    }.toSet()
-                                }
-                            )
-
-                            // 2. excludeSystemApps (whitelist only)
-                            AnimatedVisibility(
-                                visible = useWhitelist,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text(stringResource(R.string.config_exclude_system), style = MaterialTheme.typography.bodyLarge)
-                                        Switch(checked = excludeSystem, onCheckedChange = { excludeSystem = it })
-                                    }
-                                }
-                            }
-
-                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                            // 3. Aggressive Filter
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Text(stringResource(R.string.config_aggressive_filter), style = MaterialTheme.typography.bodyLarge)
-                                Switch(checked = aggressiveFilter, onCheckedChange = { aggressiveFilter = it })
+                                Text(stringResource(R.string.config_exclude_system), style = MaterialTheme.typography.bodyLarge)
+                                Switch(checked = excludeSystem, onCheckedChange = { excludeSystem = it })
                             }
+                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), modifier = Modifier.padding(vertical = 8.dp))
+                        }
+                    }
 
-                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+                    // 3. Aggressive Filter
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(stringResource(R.string.config_aggressive_filter), style = MaterialTheme.typography.bodyLarge)
+                        Switch(checked = aggressiveFilter, onCheckedChange = { aggressiveFilter = it })
+                    }
 
-                            // 4. Templates (smart classification + custom)
-                            Column {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { templatesExpanded = !templatesExpanded },
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.config_templates_header, enabledTemplates.size),
-                                        style = MaterialTheme.typography.bodyLarge
-                                    )
-                                    Icon(
-                                        imageVector = if (templatesExpanded) Icons.Default.ExpandLess
-                                        else Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(20.dp)
+                    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), modifier = Modifier.padding(vertical = 16.dp))
+
+                    // 4. Templates (smart classification + custom)
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { templatesExpanded = !templatesExpanded },
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = stringResource(R.string.config_templates_header, enabledTemplates.size),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Icon(
+                                imageVector = if (templatesExpanded) Icons.Default.ExpandLess
+                                else Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        AnimatedVisibility(
+                            visible = templatesExpanded,
+                            enter = expandVertically() + fadeIn(),
+                            exit = shrinkVertically() + fadeOut()
+                        ) {
+                            Column(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                // ── Smart Classification presets ──
+                                Text(
+                                    text = stringResource(R.string.main_smart_classify),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                                )
+                                filteredPresetTemplates.forEach { template ->
+                                    TemplateCheckboxRow(
+                                        name = template.storedName,
+                                        label = { Text(stringResource(template.displayLabelRes), style = MaterialTheme.typography.bodyLarge) },
+                                        subLabel = { Text(stringResource(template.modeLabelRes), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline) },
+                                        checked = template.storedName in enabledTemplates,
+                                        onToggle = {
+                                            enabledTemplates = if (template.storedName in enabledTemplates)
+                                                enabledTemplates - template.storedName
+                                            else enabledTemplates + template.storedName
+                                        }
                                     )
                                 }
-                                AnimatedVisibility(
-                                    visible = templatesExpanded,
-                                    enter = expandVertically() + fadeIn(),
-                                    exit = shrinkVertically() + fadeOut()
-                                ) {
-                                    Column(modifier = Modifier.padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                        // ── Smart Classification presets ──
-                                        Text(
-                                            text = stringResource(R.string.main_smart_classify),
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
-                                        )
-                                        filteredPresetTemplates.forEach { template ->
-                                            TemplateCheckboxRow(
-                                                name = template.storedName,
-                                                label = { Text(stringResource(template.displayLabelRes), style = MaterialTheme.typography.bodyLarge) },
-                                                subLabel = { Text(stringResource(template.modeLabelRes), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline) },
-                                                checked = template.storedName in enabledTemplates,
-                                                onToggle = {
-                                                    enabledTemplates = if (template.storedName in enabledTemplates)
-                                                        enabledTemplates - template.storedName
-                                                    else enabledTemplates + template.storedName
-                                                }
-                                            )
-                                        }
 
-                                        // ── Custom templates ──
-                                        if (filteredCustomTemplates.isNotEmpty()) {
-                                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), modifier = Modifier.padding(vertical = 4.dp))
-                                            Text(
-                                                text = stringResource(R.string.main_template_create),
-                                                style = MaterialTheme.typography.labelMedium,
-                                                color = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
-                                            )
-                                            filteredCustomTemplates.forEach { t ->
-                                                TemplateCheckboxRow(
-                                                    name = t.name,
-                                                    label = { Text(t.name, style = MaterialTheme.typography.bodyLarge) },
-                                                    subLabel = {
-                                                        Text(
-                                                            if (t.isWhitelist) stringResource(R.string.scope_mode_whitelist) else stringResource(R.string.scope_mode_blacklist),
-                                                            style = MaterialTheme.typography.labelSmall,
-                                                            color = MaterialTheme.colorScheme.outline
-                                                        )
-                                                    },
-                                                    checked = t.name in enabledTemplates,
-                                                    onToggle = {
-                                                        enabledTemplates = if (t.name in enabledTemplates)
-                                                            enabledTemplates - t.name
-                                                        else enabledTemplates + t.name
-                                                    }
+                                // ── Custom templates ──
+                                if (filteredCustomTemplates.isNotEmpty()) {
+                                    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), modifier = Modifier.padding(vertical = 4.dp))
+                                    Text(
+                                        text = stringResource(R.string.main_template_create),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                                    )
+                                    filteredCustomTemplates.forEach { t ->
+                                        TemplateCheckboxRow(
+                                            name = t.name,
+                                            label = { Text(t.name, style = MaterialTheme.typography.bodyLarge) },
+                                            subLabel = {
+                                                Text(
+                                                    if (t.isWhitelist) stringResource(R.string.scope_mode_whitelist) else stringResource(R.string.scope_mode_blacklist),
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.outline
                                                 )
+                                            },
+                                            checked = t.name in enabledTemplates,
+                                            onToggle = {
+                                                enabledTemplates = if (t.name in enabledTemplates)
+                                                    enabledTemplates - t.name
+                                                else enabledTemplates + t.name
                                             }
-                                        }
-                                    }
-                                }
-                            }
-
-                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-
-                            // 5. Extra App List
-                            Column {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(stringResource(R.string.config_extra_apps), style = MaterialTheme.typography.bodyLarge)
-                                    TextButton(onClick = {
-                                        // Persist local state before navigating, so
-                                        // templates/filter selections survive the round-trip
-                                        viewModel.saveConfig(refPkg, AppScopeConfig(
-                                            useWhitelist = useWhitelist,
-                                            aggressiveFilter = aggressiveFilter,
-                                            excludeSystemApps = excludeSystem,
-                                            enabledTemplates = enabledTemplates.toList(),
-                                            extraAppList = extraPackages
-                                        ))
-                                        onExtraAppListClick(refPkg, extraPackages)
-                                    }) {
-                                        Text(stringResource(R.string.config_select_extra))
-                                    }
-                                }
-                                Spacer(modifier = Modifier.height(4.dp))
-                                if (extraPackages.isEmpty()) {
-                                    Text(
-                                        text = stringResource(R.string.config_no_extra_apps),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.outline,
-                                        modifier = Modifier.padding(start = 4.dp)
-                                    )
-                                } else {
-                                    extraPackages.forEach { pkg ->
-                                        Text(
-                                            text = pkg,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                                         )
                                     }
                                 }
+                            }
+                        }
+                    }
+
+                    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f), modifier = Modifier.padding(vertical = 16.dp))
+
+                    // 5. Extra App List
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(stringResource(R.string.config_extra_apps), style = MaterialTheme.typography.bodyLarge)
+                            TextButton(onClick = {
+                                // Persist local state before navigating, so
+                                // templates/filter selections survive the round-trip
+                                viewModel.saveConfig(refPkg, AppScopeConfig(
+                                    useWhitelist = useWhitelist,
+                                    aggressiveFilter = aggressiveFilter,
+                                    excludeSystemApps = excludeSystem,
+                                    enabledTemplates = enabledTemplates.toList(),
+                                    extraAppList = extraPackages
+                                ))
+                                onExtraAppListClick(refPkg, extraPackages)
+                            }) {
+                                Text(stringResource(R.string.config_select_extra))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        if (extraPackages.isEmpty()) {
+                            Text(
+                                text = stringResource(R.string.config_no_extra_apps),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.outline,
+                                modifier = Modifier.padding(start = 4.dp)
+                            )
+                        } else {
+                            extraPackages.forEach { pkg ->
+                                Text(
+                                    text = pkg,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                                )
                             }
                         }
                     }

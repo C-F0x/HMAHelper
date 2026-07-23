@@ -17,7 +17,6 @@
     <string name="dialog_message_import">デバイスからJSON設定ファイルをインポートします。</string>
     <string name="dialog_message_export">現在の設定をJSONファイルとしてエクスポートします。</string>
     <string name="dialog_cancel">キャンセル</string>
-    <string name="config_enable_hide">隠蔽を有効化</string>
     <string name="config_work_mode">動作モード</string>
     <string name="config_blacklist">ブラックリスト</string>
     <string name="config_whitelist">ホワイトリスト</string>
@@ -76,6 +75,8 @@
     <string name="scope_mode_whitelist">ホワイトリスト</string>
     <string name="scope_mode_blacklist">ブラックリスト</string>
 
+    <string name="scope_batch_selected">%d 個選択中</string>
+
     <!-- Template -->
     <string name="template_name">テンプレート名</string>
     <string name="template_name_empty">名前は空にできません</string>
@@ -114,5 +115,6 @@
     <string name="desc_config">設定</string>
     <string name="desc_selected">選択済み</string>
     <string name="desc_add">追加</string>
+    <string name="desc_deselect">選択解除</string>
     <string name="desc_create_template">テンプレートを作成</string>
 </resources>

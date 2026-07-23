@@ -49,6 +49,8 @@
     <string name="scope_mode_whitelist">白名单</string>
     <string name="scope_mode_blacklist">黑名单</string>
 
+    <string name="scope_batch_selected">已选 %d 项</string>
+
     <!-- Template screens -->
     <string name="template_name">模板名称</string>
     <string name="template_name_empty">名称不能为空</string>
@@ -67,7 +69,6 @@
     <string name="app_auto_removed">已自动移除: %s</string>
     <string name="app_manager_title">软件列表</string>
 
-    <string name="config_enable_hide">启用隐藏</string>
     <string name="config_work_mode">工作模式</string>
     <string name="config_blacklist">黑名单</string>
     <string name="config_whitelist">白名单</string>
@@ -151,5 +152,6 @@
     <string name="desc_config">配置</string>
     <string name="desc_selected">已选中</string>
     <string name="desc_add">添加</string>
+    <string name="desc_deselect">取消选择</string>
     <string name="desc_create_template">创建模板</string>
 </resources>

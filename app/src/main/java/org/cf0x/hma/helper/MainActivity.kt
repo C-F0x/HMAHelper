@@ -166,7 +166,11 @@ fun AppNavigation(appSettings: AppSettings) {
                 viewModel = appManagerVM,
                 onBackClick = { navController.popBackStack() },
                 onCreateConfigClick = { navController.navigate("scope_select") },
-                onConfigClick = { pkg -> navController.navigate("app_config/$pkg") }
+                onConfigClick = { pkg -> navController.navigate("app_config/$pkg") },
+                onBatchConfigClick = { pkgs ->
+                    val pkgsStr = pkgs.joinToString(",")
+                    navController.navigate("app_config/$pkgsStr")
+                }
             )
         }
         composable("scope_select") {

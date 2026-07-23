@@ -25,6 +25,8 @@
     <string name="scope_mode_whitelist">Liste blanche</string>
     <string name="scope_mode_blacklist">Liste noire</string>
 
+    <string name="scope_batch_selected">%d sélectionné(s)</string>
+
     <!-- Template -->
     <string name="template_name">Nom du modèle</string>
     <string name="template_name_empty">Le nom ne peut pas être vide</string>
@@ -43,7 +45,6 @@
     <string name="app_auto_removed">Auto-supprimé : %s</string>
 
     <!-- Config -->
-    <string name="config_enable_hide">Activer le masquage</string>
     <string name="config_work_mode">Mode de travail</string>
     <string name="config_blacklist">Liste noire</string>
     <string name="config_whitelist">Liste blanche</string>
@@ -124,5 +125,6 @@
     <string name="desc_config">Configuration</string>
     <string name="desc_selected">Sélectionné</string>
     <string name="desc_add">Ajouter</string>
+    <string name="desc_deselect">Désélectionner</string>
     <string name="desc_create_template">Créer un modèle</string>
 </resources>

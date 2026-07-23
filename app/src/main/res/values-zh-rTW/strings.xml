@@ -17,7 +17,6 @@
     <string name="dialog_message_import">從裝置匯入 JSON 配置文件。</string>
     <string name="dialog_message_export">將當前配置匯出為 JSON 文件。</string>
     <string name="dialog_cancel">取消</string>
-    <string name="config_enable_hide">啟用隱藏</string>
     <string name="config_work_mode">工作模式</string>
     <string name="config_blacklist">黑名單</string>
     <string name="config_whitelist">白名單</string>
@@ -76,6 +75,8 @@
     <string name="scope_mode_whitelist">白名單</string>
     <string name="scope_mode_blacklist">黑名單</string>
 
+    <string name="scope_batch_selected">已選 %d 項</string>
+
     <!-- Template -->
     <string name="template_name">模板名稱</string>
     <string name="template_name_empty">名稱不能為空</string>
@@ -114,5 +115,6 @@
     <string name="desc_config">配置</string>
     <string name="desc_selected">已選取</string>
     <string name="desc_add">新增</string>
+    <string name="desc_deselect">取消選擇</string>
     <string name="desc_create_template">建立模板</string>
 </resources>

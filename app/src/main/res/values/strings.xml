@@ -53,6 +53,8 @@
     <string name="scope_mode_whitelist">Whitelist</string>
     <string name="scope_mode_blacklist">Blacklist</string>
 
+    <string name="scope_batch_selected">%d selected</string>
+
     <!-- Template screens -->
     <string name="template_name">Template Name</string>
     <string name="template_name_empty">Name cannot be empty</string>
@@ -71,7 +73,6 @@
     <string name="app_manager_title">App List</string>
     <string name="app_auto_removed">Auto-removed: %s</string>
 
-    <string name="config_enable_hide">Enable Hide</string>
     <string name="config_work_mode">Work Mode</string>
     <string name="config_blacklist">Blacklist</string>
     <string name="config_whitelist">Whitelist</string>
@@ -161,5 +162,6 @@
     <string name="desc_config">Config</string>
     <string name="desc_selected">Selected</string>
     <string name="desc_add">Add</string>
+    <string name="desc_deselect">Deselect</string>
     <string name="desc_create_template">Create Template</string>
 </resources>

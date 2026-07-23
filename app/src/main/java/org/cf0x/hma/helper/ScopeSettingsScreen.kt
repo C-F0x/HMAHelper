@@ -2,18 +2,24 @@ package org.cf0x.hma.helper
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -22,12 +28,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ScopeSettingsScreen(
     onBackClick: () -> Unit,
     onCreateConfigClick: () -> Unit,
     onConfigClick: (String) -> Unit,
+    onBatchConfigClick: (List<String>) -> Unit = {},
     viewModel: AppManagerViewModel = viewModel()
 ) {
     val scopeConfigs by viewModel.scopeConfigs.collectAsState()
@@ -35,6 +42,9 @@ fun ScopeSettingsScreen(
     val appLabelMap = remember(allAppsList) {
         allAppsList.associate { it.packageName to it.appLabel }
     }
+
+    var selectedForBatch by remember { mutableStateOf<Set<String>>(emptySet()) }
+    val isBatchMode = selectedForBatch.isNotEmpty()
 
     val blacklistConfigs = remember(scopeConfigs) {
         scopeConfigs.filter { !it.value.useWhitelist }.entries.sortedBy { it.key }
@@ -48,18 +58,40 @@ fun ScopeSettingsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = stringResource(R.string.main_scope_settings),
+                        text = if (isBatchMode)
+                            stringResource(R.string.scope_batch_selected, selectedForBatch.size)
+                        else
+                            stringResource(R.string.main_scope_settings),
                         fontWeight = FontWeight.Bold
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.desc_back))
+                    if (isBatchMode) {
+                        IconButton(onClick = { selectedForBatch = emptySet() }) {
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.desc_deselect))
+                        }
+                    } else {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.desc_back))
+                        }
                     }
                 },
                 actions = {
-                    IconButton(onClick = onCreateConfigClick) {
-                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.desc_add))
+                    if (isBatchMode) {
+                        IconButton(onClick = {
+                            onBatchConfigClick(selectedForBatch.toList())
+                            selectedForBatch = emptySet()
+                        }) {
+                            Icon(
+                                Icons.Default.Settings,
+                                contentDescription = stringResource(R.string.desc_config),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = onCreateConfigClick) {
+                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.desc_add))
+                        }
                     }
                 }
             )
@@ -96,7 +128,22 @@ fun ScopeSettingsScreen(
                                     label = appLabelMap[pkg] ?: pkg,
                                     templateCount = config.enabledTemplates.size,
                                     extraCount = config.extraAppList.size,
-                                    onClick = { onConfigClick(pkg) }
+                                    isBatchMode = isBatchMode,
+                                    isSelected = pkg in selectedForBatch,
+                                    onClick = {
+                                        if (isBatchMode) {
+                                            selectedForBatch = selectedForBatch.let {
+                                                if (pkg in it) it - pkg else it + pkg
+                                            }
+                                        } else {
+                                            onConfigClick(pkg)
+                                        }
+                                    },
+                                    onLongClick = {
+                                        selectedForBatch = selectedForBatch.let {
+                                            if (pkg in it) it - pkg else it + pkg
+                                        }
+                                    }
                                 )
                             }
                         }
@@ -117,7 +164,22 @@ fun ScopeSettingsScreen(
                                     label = appLabelMap[pkg] ?: pkg,
                                     templateCount = config.enabledTemplates.size,
                                     extraCount = config.extraAppList.size,
-                                    onClick = { onConfigClick(pkg) }
+                                    isBatchMode = isBatchMode,
+                                    isSelected = pkg in selectedForBatch,
+                                    onClick = {
+                                        if (isBatchMode) {
+                                            selectedForBatch = selectedForBatch.let {
+                                                if (pkg in it) it - pkg else it + pkg
+                                            }
+                                        } else {
+                                            onConfigClick(pkg)
+                                        }
+                                    },
+                                    onLongClick = {
+                                        selectedForBatch = selectedForBatch.let {
+                                            if (pkg in it) it - pkg else it + pkg
+                                        }
+                                    }
                                 )
                             }
                         }
@@ -131,8 +193,8 @@ fun ScopeSettingsScreen(
 @Composable
 internal fun ModeGroupCard(
     modeLabel: String,
-    labelColor: androidx.compose.ui.graphics.Color,
-    bgColor: androidx.compose.ui.graphics.Color,
+    labelColor: Color,
+    bgColor: Color,
     content: @Composable ColumnScope.() -> Unit
 ) {
     ElevatedCard(
@@ -171,13 +233,17 @@ internal fun ModeGroupCard(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ConfigEntryRow(
     pkg: String,
     label: String,
     templateCount: Int,
     extraCount: Int,
-    onClick: () -> Unit
+    isBatchMode: Boolean,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
 ) {
     val context = LocalContext.current
     var iconBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
@@ -189,12 +255,22 @@ private fun ConfigEntryRow(
         iconBitmap = drawable?.toBitmap(48, 48, null)
     }
 
+    val border = if (isSelected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.medium)
-            .clickable { onClick() },
-        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.4f)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            ),
+        shape = MaterialTheme.shapes.medium,
+        border = border,
+        color = if (isSelected)
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+        else
+            MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.4f)
     ) {
         Row(
             modifier = Modifier
@@ -203,6 +279,15 @@ private fun ConfigEntryRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Selection checkbox in batch mode
+            if (isBatchMode) {
+                Checkbox(
+                    checked = isSelected,
+                    onCheckedChange = { onClick() },
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
             // App icon
             val icon = iconBitmap
             if (icon != null) {

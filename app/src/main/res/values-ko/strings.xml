@@ -17,7 +17,6 @@
     <string name="dialog_message_import">기기에서 JSON 설정 파일을 가져옵니다.</string>
     <string name="dialog_message_export">현재 설정을 JSON 파일로 내보냅니다.</string>
     <string name="dialog_cancel">취소</string>
-    <string name="config_enable_hide">숨김 활성화</string>
     <string name="config_work_mode">작업 모드</string>
     <string name="config_blacklist">블랙리스트</string>
     <string name="config_whitelist">화이트리스트</string>
@@ -76,6 +75,8 @@
     <string name="scope_mode_whitelist">화이트리스트</string>
     <string name="scope_mode_blacklist">블랙리스트</string>
 
+    <string name="scope_batch_selected">%d개 선택됨</string>
+
     <!-- Template -->
     <string name="template_name">템플릿 이름</string>
     <string name="template_name_empty">이름은 비워둘 수 없습니다</string>
@@ -114,5 +115,6 @@
     <string name="desc_config">설정</string>
     <string name="desc_selected">선택됨</string>
     <string name="desc_add">추가</string>
+    <string name="desc_deselect">선택 해제</string>
     <string name="desc_create_template">템플릿 생성</string>
 </resources>
