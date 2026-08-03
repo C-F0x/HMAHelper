@@ -47,4 +47,13 @@ class EmbeddedXposedPreset : BasePreset(NAME) {
             Log.v(TAG, "Zip error $pkgName: ${e.message}")
         }.getOrDefault(false)
     }
+
+    override fun canBeAddedViaRoot(pkg: String, info: RootAppInfo): Boolean {
+        val rootKeys = setOf("lspatch", "jshook", "xposedmodule", "com.taichi", "va_xposed")
+        if (info.metaKeys.any { it in rootKeys }) {
+            Log.i(TAG, "MATCH (root:meta) $pkg")
+            return true
+        }
+        return false
+    }
 }

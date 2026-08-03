@@ -17,6 +17,8 @@
     <string name="dialog_message_import">Importer un fichier JSON de configuration depuis l\'appareil.</string>
     <string name="dialog_message_export">Exporter la configuration actuelle en fichier JSON.</string>
     <string name="dialog_cancel">Annuler</string>
+    <string name="export_failed">Échec de l\'export</string>
+    <string name="import_failed">Échec de l\'import</string>
 
     <!-- Scope -->
     <string name="scope_empty">Aucune configuration de portée. Appuyez sur + pour en ajouter une.</string>
@@ -44,6 +46,27 @@
     <!-- App manager -->
     <string name="app_auto_removed">Auto-supprimé : %s</string>
 
+    <!-- Work mode / Root / OOBE -->
+    <string name="setting_work_mode">Mode de travail</string>
+    <string name="setting_show_import_export">Afficher les boutons Importer/Exporter</string>
+    <string name="work_mode_root_available">Accès root détecté</string>
+    <string name="work_mode_root_unavailable">Aucun accès root détecté</string>
+    <string name="manage_hma_config">Gérer la config HMA</string>
+    <string name="manage_hma_config_confirm">Cela écrasera la configuration existante de Hide My Applist à la prochaine synchronisation. Sauvegardez-la ou migrez-la vers %1$s d\'abord si vous souhaitez la conserver.</string>
+    <string name="manage_hma_config_desc">Lire/écrire directement config.json de Hide My Applist via root</string>
+    <string name="hma_sync_title">Config écrite dans HMA</string>
+    <string name="hma_sync_message">La config a été écrite dans config.json de HMA. Redémarrez Hide My Applist pour appliquer.</string>
+    <string name="hma_restart_button">Redémarrer HMA</string>
+    <string name="hma_action_add_scope">Portée ajoutée</string>
+    <string name="hma_action_remove_scope">Portée supprimée</string>
+    <string name="hma_action_modify_scope">Portée modifiée</string>
+    <string name="hma_action_add_template">Modèle ajouté</string>
+    <string name="hma_action_remove_template">Modèle supprimé</string>
+    <string name="hma_action_modify_template">Modèle modifié</string>
+    <string name="hma_toast_n_apps">%d applis</string>
+    <string name="hma_force_stop_toast">HideMyApplist arrêté, Pid:%s</string>
+    <string name="hma_restart_toast">HideMyApplist relancé, Pid:%s</string>
+
     <!-- Config -->
     <string name="config_work_mode">Mode de travail</string>
     <string name="config_blacklist">Liste noire</string>
@@ -67,6 +90,7 @@
     <string name="main_template_create">Modèle personnalisé</string>
     <string name="app_manager_search">Rechercher des apps…</string>
     <string name="app_manager_tab_user">Utilisateur</string>
+    <string name="app_manager_selected_count">%d sélectionnée(s)</string>
     <string name="app_manager_tab_system">Système</string>
 
     <string name="setting_language">Langue</string>
@@ -127,4 +151,29 @@
     <string name="desc_add">Ajouter</string>
     <string name="desc_deselect">Désélectionner</string>
     <string name="desc_create_template">Créer un modèle</string>
+    <string name="color_hex_label">Hexadécimal</string>
+    <string name="color_hex_invalid">Hexadécimal invalide, format : #RRGGBB</string>
+
+    <!-- Missing keys backfill -->
+    <string name="misc_config">Autres réglages</string>
+    <string name="misc_config_version">configVersion</string>
+    <string name="misc_detail_log">detailLog</string>
+    <string name="misc_max_log_size">maxLogSize</string>
+    <string name="misc_max_log_size_k">%dK</string>
+    <string name="misc_force_mount_data">forceMountData</string>
+    <string name="misc_aggressive_filter">aggressiveFilter</string>
+    <string name="misc_aggressive_filter_hint">Utilité inconnue, désactivé par sécurité</string>
+    <string name="dialog_export_saf">Export SAF</string>
+    <string name="dialog_export_quick">Export rapide</string>
+    <string name="dialog_export_quick_done">Exporté vers le dossier partagé</string>
+    <string name="dialog_import_overwrite">Écraser (effacer puis importer)</string>
+    <string name="dialog_import_overwrite_hint">La classification intelligente écrase toujours les conflits</string>
+    <string name="dialog_import_preview_title">Aperçu de l\'import</string>
+    <string name="dialog_import_preview_templates">Modèles : %d</string>
+    <string name="dialog_import_preview_scope">Apps de portée : %d</string>
+    <string name="dialog_import_preview_corrupt">Configuration corrompue</string>
+    <string name="dialog_import_confirm">Importer</string>
+    <string name="dialog_import_removed_scope">%d app(s) de portée manquante(s) supprimée(s)</string>
+    <string name="scope_config_count">Modèles : %1$d  Extra : %2$d</string>
+    <string name="app_manager_title">Liste d\'apps</string>
 </resources>

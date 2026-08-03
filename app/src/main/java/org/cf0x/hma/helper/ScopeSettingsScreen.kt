@@ -1,5 +1,7 @@
 package org.cf0x.hma.helper
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.BorderStroke
@@ -21,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -255,8 +258,16 @@ private fun ConfigEntryRow(
         iconBitmap = drawable?.toBitmap(48, 48, null)
     }
 
-    val border = if (isSelected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null
+    // Flip animation — same visual language as the app manager: in batch mode,
+    // a selected entry's icon flips 180° into a checkmark badge.
+    val rotation by animateFloatAsState(
+        targetValue = if (isBatchMode && isSelected) 180f else 0f,
+        animationSpec = spring(dampingRatio = 0.5f, stiffness = 400f),
+        label = "flipRotation"
+    )
 
+    // No border in batch mode — selection is shown by the checkmark badge on
+    // the app icon (same visual language as the app manager).
     Surface(
         modifier = Modifier
             .fillMaxWidth()
@@ -266,7 +277,6 @@ private fun ConfigEntryRow(
                 onLongClick = onLongClick
             ),
         shape = MaterialTheme.shapes.medium,
-        border = border,
         color = if (isSelected)
             MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         else
@@ -279,36 +289,65 @@ private fun ConfigEntryRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Selection checkbox in batch mode
-            if (isBatchMode) {
-                Checkbox(
-                    checked = isSelected,
-                    onCheckedChange = { onClick() },
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            // App icon
-            val icon = iconBitmap
-            if (icon != null) {
-                Image(
-                    bitmap = icon.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier.size(36.dp)
-                )
-            } else {
-                Surface(
-                    modifier = Modifier.size(36.dp),
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                ) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            // App icon — in batch mode, selection flips the icon into a
+            // checkmark badge (same as the app manager's multi-select).
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .graphicsLayer {
+                        rotationY = rotation
+                        cameraDistance = 12f * density
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                // Front face (visible when rotation < 90°)
+                if (rotation < 90f) {
+                    val icon = iconBitmap
+                    if (icon != null) {
+                        Image(
+                            bitmap = icon.asImageBitmap(),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(36.dp)
                         )
+                    } else {
+                        Surface(
+                            modifier = Modifier.size(36.dp),
+                            shape = MaterialTheme.shapes.small,
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+                // Back face (visible when rotation >= 90°)
+                if (rotation >= 90f) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .graphicsLayer { rotationY = -rotation },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Surface(
+                            modifier = Modifier.size(36.dp),
+                            shape = MaterialTheme.shapes.extraLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        ) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = stringResource(R.string.desc_selected),
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

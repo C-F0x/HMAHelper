@@ -18,6 +18,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import org.cf0x.hma.helper.R
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -232,11 +234,11 @@ fun ColorPickerWheel(
                     hexInput = if (clean.startsWith("#")) clean.take(7)
                     else "#${clean.take(6)}"
                 },
-                label          = { Text("Hex") },
+                label          = { Text(stringResource(R.string.color_hex_label)) },
                 placeholder    = { Text("#6750A4") },
                 singleLine     = true,
                 isError        = hexError,
-                supportingText = if (hexError) {{ Text("Invalid hex, format: #RRGGBB") }} else null,
+                supportingText = if (hexError) {{ Text(stringResource(R.string.color_hex_invalid)) }} else null,
                 textStyle      = MaterialTheme.typography.bodyLarge.copy(
                     fontFamily = FontFamily.Monospace
                 ),

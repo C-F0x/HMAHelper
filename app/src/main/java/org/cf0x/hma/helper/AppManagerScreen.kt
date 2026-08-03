@@ -1,6 +1,5 @@
 package org.cf0x.hma.helper
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -11,6 +10,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,8 +45,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.cf0x.hma.helper.ui.components.Md3Toast
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun AppManagerScreen(
     onBackClick: () -> Unit,
@@ -68,10 +69,14 @@ fun AppManagerScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = stringResource(
-                            titleRes ?: if (onExtraConfirm != null) R.string.main_extra_app_select
-                            else R.string.app_manager_title
-                        ),
+                        text = if (selectedCount > 0) {
+                            stringResource(R.string.app_manager_selected_count, selectedCount)
+                        } else {
+                            stringResource(
+                                titleRes ?: if (onExtraConfirm != null) R.string.main_extra_app_select
+                                else R.string.app_manager_title
+                            )
+                        },
                         fontWeight = FontWeight.Bold
                     )
                 },
@@ -93,9 +98,11 @@ fun AppManagerScreen(
                             IconButton(onClick = {
                                 val removed = selectedPackages.filter { it !in allAppNames }
                                 if (removed.isNotEmpty()) {
-                                    Toast.makeText(context,
+                                    Md3Toast.show(
+                                        context,
                                         context.getString(R.string.app_auto_removed, removed.joinToString(", ")),
-                                        Toast.LENGTH_LONG).show()
+                                        long = true
+                                    )
                                 }
                                 val valid = selectedPackages.filter { it in allAppNames }
                                 viewModel.clearSelection()
@@ -103,7 +110,7 @@ fun AppManagerScreen(
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
-                                    contentDescription = "Confirm",
+                                    contentDescription = stringResource(R.string.card_add_confirm),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -188,7 +195,10 @@ fun AppManagerScreen(
                         AppListItem(
                             appInfo = appInfo,
                             isSelected = isSel,
-                            onToggle = { viewModel.toggleSelection(appInfo.packageName) }
+                            onToggle = { viewModel.toggleSelection(appInfo.packageName) },
+                            // Selected entries float to the top; animate the
+                            // reordering smoothly instead of jumping.
+                            modifier = Modifier.animateItem()
                         )
                     }
                 }
@@ -330,7 +340,8 @@ private fun BigPillToggle(
 private fun AppListItem(
     appInfo: AppInfo,
     isSelected: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     var iconBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
@@ -352,8 +363,9 @@ private fun AppListItem(
     val border = if (isSelected) BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
+            .clip(MaterialTheme.shapes.medium)
             .clickable { onToggle() },
         shape = MaterialTheme.shapes.medium,
         border = border,
@@ -415,13 +427,13 @@ private fun AppListItem(
                         Surface(
                             modifier = Modifier.size(36.dp),
                             shape = MaterialTheme.shapes.extraLarge,
-                            color = Color(0xFF4CAF50)
+                            color = MaterialTheme.colorScheme.primary
                         ) {
                             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = stringResource(R.string.desc_selected),
-                                    tint = Color.White,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
                                     modifier = Modifier.size(22.dp)
                                 )
                             }

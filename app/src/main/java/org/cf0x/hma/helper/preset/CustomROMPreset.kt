@@ -21,4 +21,13 @@ class CustomROMPreset : BasePreset(NAME) {
         // keyword matching handled by BasePreset.addPackageInfoPreset
         return false
     }
+
+    override fun canBeAddedViaRoot(pkg: String, info: RootAppInfo): Boolean {
+        val path = info.apkPath
+        if (path != null && PresetListLoader.customRomPathFragments.any { path.contains(it) }) {
+            Log.i(TAG, "MATCH (root:path) $pkg")
+            return true
+        }
+        return super.canBeAddedViaRoot(pkg, info)
+    }
 }

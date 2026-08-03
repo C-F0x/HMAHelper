@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Assignment
+import androidx.compose.material.icons.automirrored.outlined.Assignment
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -142,7 +144,8 @@ private fun TemplateEntryRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Template icon placeholder
+            // Template icon — mirrors HMA: filled Assignment for blacklist,
+            // outline Assignment for whitelist.
             Surface(
                 modifier = Modifier.size(36.dp),
                 shape = MaterialTheme.shapes.small,
@@ -150,7 +153,8 @@ private fun TemplateEntryRow(
             ) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Icon(
-                        imageVector = Icons.Default.Add,
+                        imageVector = if (template.isWhitelist) Icons.AutoMirrored.Outlined.Assignment
+                        else Icons.AutoMirrored.Filled.Assignment,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(18.dp)

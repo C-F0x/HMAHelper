@@ -3,7 +3,6 @@ package org.cf0x.hma.helper
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -48,6 +47,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.cf0x.hma.helper.PresetNaming
 import org.cf0x.hma.helper.data.AppSettings
+import org.cf0x.hma.helper.root.HmaConfigManager
+import org.cf0x.hma.helper.ui.components.Md3Toast
 import org.cf0x.hma.helper.ui.theme.HMAHelperTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +64,7 @@ fun MainScreen(
 ) {
     val presetCounts by viewModel.presetCounts.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
-    val scopeCount by viewModel.scopeCount.collectAsState()
+    val scopeConfigs by appManagerVM.scopeConfigs.collectAsState()
     val customTemplateCount by appManagerVM.templates.collectAsState()
 
     // Dialog states
@@ -94,6 +95,12 @@ fun MainScreen(
     val maxLogSize by appSettings.maxLogSize.collectAsState(initial = 512)
     val forceMountData by appSettings.forceMountData.collectAsState(initial = true)
     val aggressiveFilter by appSettings.aggressiveFilter.collectAsState(initial = false)
+
+    // Work mode + HMA takeover state
+    val showImportExport by appSettings.showImportExport.collectAsState(initial = true)
+    val manageHmaConfig by appSettings.manageHmaConfig.collectAsState(initial = false)
+    var showHmaRestartDialog by remember { mutableStateOf(false) }
+    var hmaRestarting by remember { mutableStateOf(false) }
 
     val context = androidx.compose.ui.platform.LocalContext.current
 
@@ -157,6 +164,23 @@ fun MainScreen(
         return json
     }
 
+    // Inject the full-HMA-JSON builder so AppManagerViewModel can push
+    // changes straight into HMA's config.json in ROOT takeover mode.
+    // Placed after buildExportJson: Kotlin local functions must be declared
+    // before they are referenced.
+    LaunchedEffect(Unit) {
+        appManagerVM.hmaJsonBuilder = { buildExportJson().toString() }
+        // Toasts are shown by the ViewModel (any screen); here we only surface
+        // the restart prompt. StateFlow keeps the event until consumed, so the
+        // prompt still appears after returning from a sub-screen.
+        appManagerVM.hmaSyncEvent.collect { change ->
+            if (change != null) {
+                showHmaRestartDialog = true
+                appManagerVM.consumeHmaSyncEvent()
+            }
+        }
+    }
+
     // ── Export launcher ──
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
@@ -170,6 +194,9 @@ fun MainScreen(
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                scope.launch(Dispatchers.Main) {
+                    Md3Toast.show(context, context.getString(R.string.export_failed))
+                }
             }
         }
     }
@@ -207,85 +234,17 @@ fun MainScreen(
     }
 
     fun doImport(jsonStr: String) {
-        scope.launch(Dispatchers.IO) {
-            try {
-                val json = JSONObject(jsonStr)
-
-                // 1. Clear all existing
-                appManagerVM.getTemplates().toList().forEach { t ->
-                    appManagerVM.removeTemplate(t.name)
+        appManagerVM.importJson(
+            jsonStr = jsonStr,
+            appSettings = appSettings,
+            onScopeRemoved = { finalRemoved ->
+                viewModel.reload()
+                if (finalRemoved > 0) {
+                    Md3Toast.show(context, context.getString(R.string.dialog_import_removed_scope, finalRemoved), long = true)
                 }
-                appManagerVM.scopeConfigs.value.keys.toList().forEach { pkg ->
-                    appManagerVM.removeConfig(pkg)
-                }
-
-                // 2. Misc config with defaults
-                appSettings.saveConfigVersion(json.optInt("configVersion", 93))
-                appSettings.saveDetailLog(json.optBoolean("detailLog", false))
-                appSettings.saveMaxLogSize(json.optInt("maxLogSize", 512))
-                appSettings.saveForceMountData(json.optBoolean("forceMountData", true))
-                appSettings.saveAggressiveFilter(json.optBoolean("aggressiveFilter", false))
-
-                // 3. Templates (skip built-in presets, keep custom ones)
-                if (json.has("templates")) {
-                    val tObj = json.getJSONObject("templates")
-                    tObj.keys().forEach { name ->
-                        // Skip prefixed preset names — they are built-in
-                        if (PresetNaming.resolveToId(context, name) != null) return@forEach
-                        val t = tObj.getJSONObject(name)
-                        val appList = mutableListOf<String>()
-                        val arr = t.getJSONArray("appList")
-                        for (i in 0 until arr.length()) appList.add(arr.getString(i))
-                        appManagerVM.addTemplate(org.cf0x.hma.helper.Template(
-                            name = name,
-                            isWhitelist = t.getBoolean("isWhitelist"),
-                            appList = appList
-                        ))
-                    }
-                }
-
-                // 4. Scope configs (skip missing packages)
-                var removedCount = 0
-                val installedPkgs = appManagerVM.allApps.value.map { it.packageName }.toSet()
-                if (json.has("scope")) {
-                    val sObj = json.getJSONObject("scope")
-                    sObj.keys().forEach { pkg ->
-                        if (pkg !in installedPkgs) {
-                            removedCount++
-                            return@forEach
-                        }
-                        val s = sObj.getJSONObject(pkg)
-                        val templates = mutableListOf<String>()
-                        if (s.has("applyTemplates")) {
-                            val arr = s.getJSONArray("applyTemplates")
-                            for (i in 0 until arr.length()) templates.add(arr.getString(i))
-                        }
-                        val extra = mutableListOf<String>()
-                        if (s.has("extraAppList")) {
-                            val arr = s.getJSONArray("extraAppList")
-                            for (i in 0 until arr.length()) extra.add(arr.getString(i))
-                        }
-                        appManagerVM.saveConfig(pkg, org.cf0x.hma.helper.AppScopeConfig(
-                            useWhitelist = s.optBoolean("useWhitelist", false),
-                            aggressiveFilter = s.optBoolean("aggressiveFilter", false),
-                            excludeSystemApps = s.optBoolean("excludeSystemApps", true),
-                            enabledTemplates = templates,
-                            extraAppList = extra
-                        ))
-                    }
-                }
-
-                val finalRemoved = removedCount
-                scope.launch(Dispatchers.Main) {
-                    viewModel.reload()
-                    if (finalRemoved > 0) {
-                        Toast.makeText(context, context.getString(R.string.dialog_import_removed_scope, finalRemoved), Toast.LENGTH_LONG).show()
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+            },
+            onDone = {}
+        )
     }
 
     Scaffold(
@@ -298,7 +257,14 @@ fun MainScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = { viewModel.reload() }) {
+                    IconButton(onClick = {
+                        // In takeover mode, refresh also force-rewrites HMA's
+                        // config.json unconditionally (silent push), then rescan.
+                        if (manageHmaConfig) {
+                            appManagerVM.pushToHmaNow()
+                        }
+                        viewModel.reload()
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = stringResource(R.string.preset_refresh)
@@ -326,14 +292,14 @@ fun MainScreen(
 
             // ── Status Block ──
             StatusBlock(
-                scopeCount = scopeCount,
+                scopeCount = scopeConfigs.size,
                 customTemplateCount = customTemplateCount.size,
                 isLoading = isLoading,
                 onSizeChanged = { statusHeightPx = it }
             )
 
             // ── Import / Export Row ──
-            if (statusHeightDp > 0.dp) {
+            if (showImportExport && statusHeightDp > 0.dp) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -664,6 +630,53 @@ fun MainScreen(
         }
     }
 
+    // ── HMA Restart Dialog (ROOT takeover) ──
+    if (showHmaRestartDialog) {
+        AlertDialog(
+            onDismissRequest = { showHmaRestartDialog = false },
+            shape = MaterialTheme.shapes.extraLarge,
+            title = { Text(stringResource(R.string.hma_sync_title)) },
+            text = { Text(stringResource(R.string.hma_sync_message)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        hmaRestarting = true
+                        scope.launch(Dispatchers.IO) {
+                            val result = HmaConfigManager.restartHma()
+                            scope.launch(Dispatchers.Main) {
+                                hmaRestarting = false
+                                showHmaRestartDialog = false
+                                Md3Toast.show(
+                                    context,
+                                    context.getString(R.string.hma_force_stop_toast, result.stoppedPid?.toString() ?: "?")
+                                )
+                                Md3Toast.show(
+                                    context,
+                                    context.getString(R.string.hma_restart_toast, result.startedPid?.toString() ?: "?")
+                                )
+                            }
+                        }
+                    },
+                    enabled = !hmaRestarting
+                ) {
+                    if (hmaRestarting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Text(stringResource(R.string.hma_restart_button))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showHmaRestartDialog = false }) {
+                    Text(stringResource(R.string.card_add_cancel))
+                }
+            }
+        )
+    }
+
     // ── Import Dialog ──
     if (showImportDialog) {
         AlertDialog(
@@ -776,7 +789,7 @@ fun MainScreen(
                                     file.writeText(content)
 
                                     scope.launch(Dispatchers.Main) {
-                                        Toast.makeText(context, context.getString(R.string.dialog_export_quick_done), Toast.LENGTH_LONG).show()
+                                        Md3Toast.show(context, context.getString(R.string.dialog_export_quick_done), long = true)
                                     }
                                 } catch (e: Exception) {
                                     e.printStackTrace()
@@ -814,7 +827,8 @@ private fun StatusBlock(
             .onSizeChanged { onSizeChanged(it.height.toFloat()) },
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            // Low-saturation accent from the monet palette instead of flat grey.
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
         )
     ) {
         Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp)) {

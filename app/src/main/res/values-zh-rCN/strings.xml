@@ -40,6 +40,8 @@
     <string name="dialog_import_confirm">导入</string>
     <string name="dialog_import_removed_scope">已移除 %d 个不存在的作用域软件</string>
     <string name="dialog_cancel">取消</string>
+    <string name="export_failed">导出失败</string>
+    <string name="import_failed">导入失败</string>
 
     <!-- Scope settings -->
     <string name="scope_empty">暂无作用域配置，点击 + 添加。</string>
@@ -67,7 +69,30 @@
 
     <!-- App manager -->
     <string name="app_auto_removed">已自动移除: %s</string>
+
+    <!-- Work mode / Root / OOBE -->
+    <string name="setting_work_mode">工作模式</string>
+    <string name="setting_show_import_export">显示导入/导出按钮</string>
+    <string name="work_mode_root_available">已检测到 Root 权限</string>
+    <string name="work_mode_root_unavailable">未检测到 Root 权限</string>
+    <string name="manage_hma_config">接管 HMA 配置</string>
+    <string name="manage_hma_config_confirm">开启后将在下次推送时覆盖 Hide My Applist 的现有配置。如需保留，请先自行迁移到 %1$s。</string>
+    <string name="manage_hma_config_desc">通过 root 直接读写 Hide My Applist 的 config.json</string>
+    <string name="hma_sync_title">配置已写入 HMA</string>
+    <string name="hma_sync_message">配置已写入 HMA 的 config.json，重启 Hide My Applist 后生效。</string>
+    <string name="hma_restart_button">重启 HMA</string>
+    <string name="hma_action_add_scope">添加作用域</string>
+    <string name="hma_action_remove_scope">移除作用域</string>
+    <string name="hma_action_modify_scope">修改作用域</string>
+    <string name="hma_action_add_template">添加模板</string>
+    <string name="hma_action_remove_template">移除模板</string>
+    <string name="hma_action_modify_template">修改模板</string>
+    <string name="hma_toast_n_apps">%d 个软件</string>
+    <string name="hma_force_stop_toast">强制关闭 HideMyApplist, Pid:%s</string>
+    <string name="hma_restart_toast">重新拉起 HideMyApplist, Pid:%s</string>
+
     <string name="app_manager_title">软件列表</string>
+    <string name="app_manager_selected_count">已选中 %d 个软件</string>
 
     <string name="config_work_mode">工作模式</string>
     <string name="config_blacklist">黑名单</string>
@@ -154,4 +179,6 @@
     <string name="desc_add">添加</string>
     <string name="desc_deselect">取消选择</string>
     <string name="desc_create_template">创建模板</string>
+    <string name="color_hex_label">十六进制</string>
+    <string name="color_hex_invalid">无效的十六进制，格式: #RRGGBB</string>
 </resources>

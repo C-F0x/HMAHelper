@@ -8,6 +8,10 @@ abstract class BasePreset(val name: String) {
 
     protected abstract fun canBeAddedIntoPreset(appInfo: ApplicationInfo): Boolean
 
+    /** Root-based detection: evaluate a package from [RootAppInfo] facts only. */
+    protected open fun canBeAddedViaRoot(pkg: String, info: RootAppInfo): Boolean =
+        keywords.any { pkg.contains(it) }
+
     val packages: Set<String> get() = packageNames.toSet()
 
     fun clearPackageList() = packageNames.clear()
@@ -17,6 +21,15 @@ abstract class BasePreset(val name: String) {
         if (packageNames.contains(packageName)) return false
         if (canBeAddedIntoPreset(appInfo) || keywords.any { packageName.contains(it) }) {
             packageNames.add(packageName)
+            return true
+        }
+        return false
+    }
+
+    fun addPackageInfoRoot(pkg: String, info: RootAppInfo): Boolean {
+        if (packageNames.contains(pkg)) return false
+        if (canBeAddedViaRoot(pkg, info)) {
+            packageNames.add(pkg)
             return true
         }
         return false

@@ -3,20 +3,17 @@ package org.cf0x.hma.helper
 import android.app.Application
 import android.content.pm.PackageManager
 import android.util.Log
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.cf0x.hma.helper.data.dataStore
 import org.cf0x.hma.helper.preset.PackageScanner
 import org.cf0x.hma.helper.preset.PresetManager
-
-private val SCOPE_CONFIGS_KEY = stringPreferencesKey("scope_configs")
+import org.cf0x.hma.helper.preset.RootScanner
+import org.cf0x.hma.helper.root.RootShell
 
 data class PresetAppItem(
     val packageName: String,
@@ -37,8 +34,7 @@ class PresetViewModel(application: Application) : AndroidViewModel(application) 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    private val _scopeCount = MutableStateFlow(0)
-    val scopeCount: StateFlow<Int> = _scopeCount.asStateFlow()
+    private var reloadJob: kotlinx.coroutines.Job? = null
 
     val presetNames = PresetManager.PRESET_NAMES
 
@@ -47,11 +43,19 @@ class PresetViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     fun reload() {
-        viewModelScope.launch(Dispatchers.IO) {
+        // Cancel any in-flight scan so concurrent reloads (init, refresh
+        // button, package broadcast) cannot interleave on the shared preset
+        // manager or leave a stale loading state.
+        reloadJob?.cancel()
+        reloadJob = viewModelScope.launch(Dispatchers.IO) {
             _isLoading.value = true
 
             val context = getApplication<Application>()
             val pm = context.packageManager
+
+            // --- Step 0: root-powered scanning is automatic when root is present ---
+            val rootAvailable = RootShell.isRootAvailable()
+            Log.i("PresetVM", "rootAvailable=$rootAvailable")
 
             // --- Step 1: standard bulk query ---
             val stdApps = pm.getInstalledPackages(PackageManager.GET_META_DATA)
@@ -73,21 +77,46 @@ class PresetViewModel(application: Application) : AndroidViewModel(application) 
             // --- Step 4: merge ---
             val allApps = (stdApps + extraApps).distinctBy { it.packageName }
 
-            // --- Step 5: run presets ---
+            // --- Step 5: run presets (PackageManager-based) ---
             presetManager.reloadPresets(allApps)
+
+            // --- Step 5.5: run root presets (ROOT mode) — merges into the same lists ---
+            val rootApps: Map<String, org.cf0x.hma.helper.preset.RootAppInfo> =
+                if (rootAvailable) RootScanner.scan() else emptyMap()
+            if (rootApps.isNotEmpty()) {
+                presetManager.reloadPresetsRoot(rootApps)
+            }
+
+            // --- Step 5.7: libxposed modules (next-gen Xposed modules declare a
+            //     io.github.libxposed.service.XposedProvider ContentProvider) ---
+            val libXposedPkgs = runCatching {
+                pm.queryContentProviders(null, 0, 0)
+                    .filter { p ->
+                        val n = p.name ?: ""
+                        val a = p.authority ?: ""
+                        (n.startsWith("io.github.libxposed.service.") &&
+                                (n.contains("XposedProvider") || n.contains("XposedEntryProvider"))) ||
+                                a.contains("XposedService")
+                    }
+                    .map { it.packageName }
+                    .toSet()
+            }.getOrDefault(emptySet())
+            if (libXposedPkgs.isNotEmpty()) {
+                Log.i("PresetVM", "libxposed modules: ${libXposedPkgs.size}")
+                presetManager.addPackagesToPreset("xposed", libXposedPkgs)
+            }
 
             // --- Step 6: dedup ---
             val xposedPkgs = presetManager.getPresetPackages("xposed")
             presetManager.removeFromPreset("embedded_xposed", xposedPkgs)
 
-            // --- Step 6.5: load scope config count ---
-            val rawScope = context.dataStore.data.first()[SCOPE_CONFIGS_KEY] ?: ""
-            _scopeCount.value = rawScope.split("\n").count { it.isNotBlank() }
+            // --- Step 6.5: (removed — scope count is now derived reactively from
+            //     AppManagerViewModel.scopeConfigs on the home screen) ---
 
             _presetCounts.value = presetManager.getAllPresetCounts()
 
             // --- Step 7: build display list ---
-            val installedSet = stdNames + scannedNames // union: everything visible through any path
+            val installedSet = stdNames + scannedNames + rootApps.keys // union: everything visible through any path
             val appListMap = mutableMapOf<String, List<PresetAppItem>>()
             presetNames.forEach { name ->
                 val allPackages = presetManager.getPresetPackages(name)

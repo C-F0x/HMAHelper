@@ -29,7 +29,6 @@ class PresetManager(context: Context) {
     fun readManifest(packageName: String, zipFile: java.util.zip.ZipFile): String {
         if (Runtime.getRuntime().freeMemory() < 2048000) {
             manifestDataCache.clear()
-            System.gc()
             Log.v(TAG, "@readManifest cleared memory")
         }
 
@@ -60,6 +59,12 @@ class PresetManager(context: Context) {
         getPresetByName(name)?.packageNames?.removeAll(packages)
     }
 
+    /** Manually add packages to a preset (used for non-manifest signals like libxposed providers). */
+    fun addPackagesToPreset(name: String, packages: Set<String>) {
+        val preset = getPresetByName(name) ?: return
+        preset.packageNames.addAll(packages)
+    }
+
     fun reloadPresets(appsList: List<ApplicationInfo>) {
         presetList.forEach { it.clearPackageList() }
 
@@ -70,6 +75,9 @@ class PresetManager(context: Context) {
 
         for (appInfo in appsList) {
             if (appInfo.packageName == "android") continue
+            // Skip runtime resource overlays (RRO) — not real apps.
+            // 0x01000000 = ApplicationInfo.FLAG_IS_RESOURCE_OVERLAY (API 21+)
+            if ((appInfo.flags and 0x01000000) != 0) continue
 
             presetList.forEach { preset ->
                 runCatching {
@@ -85,6 +93,33 @@ class PresetManager(context: Context) {
 
         manifestDataCache.clear()
         Log.i(TAG, "=== Scan done: errors=$errorCount, matches=$matchCounts ===")
+    }
+
+    /**
+     * Root-based scan. Does NOT clear existing matches — call this after
+     * [reloadPresets] so root facts merge with (and complement) the
+     * PackageManager-based results.
+     */
+    fun reloadPresetsRoot(rootApps: Map<String, RootAppInfo>) {
+        Log.i(TAG, "=== Starting root scan: ${rootApps.size} apps ===")
+        val matchCounts = mutableMapOf<String, Int>()
+
+        for ((pkg, info) in rootApps) {
+            if (pkg == "android") continue
+            // Skip runtime resource overlays (RRO) — not real apps.
+            if (info.isOverlay) continue
+
+            presetList.forEach { preset ->
+                runCatching {
+                    if (preset.addPackageInfoRoot(pkg, info)) {
+                        matchCounts[preset.name] = (matchCounts[preset.name] ?: 0) + 1
+                    }
+                }.onFailure { e ->
+                    Log.e(TAG, "Error checking $pkg against ${preset.name}", e)
+                }
+            }
+        }
+        Log.i(TAG, "=== Root scan done: matches=$matchCounts ===")
     }
 
     override fun toString(): String {

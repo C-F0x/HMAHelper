@@ -33,6 +33,21 @@ class HmaDocumentsProvider : DocumentsProvider() {
 
     override fun onCreate(): Boolean = true
 
+    /** Export directory exposed by this provider. */
+    private val exportRoot: File
+        get() = File(context!!.filesDir, "HMA Helper/data/export")
+
+    /** Resolve a document id to a File, refusing anything outside the export root. */
+    private fun resolveDocument(documentId: String): File {
+        val file = if (documentId == "/" || documentId == DEFAULT_ROOT_ID) exportRoot else File(documentId)
+        val normalized = file.canonicalFile
+        val rootPath = exportRoot.canonicalPath
+        if (!normalized.path.startsWith(rootPath)) {
+            throw FileNotFoundException("Invalid document: $documentId")
+        }
+        return normalized
+    }
+
     override fun queryRoots(projection: Array<String>?): Cursor {
         return MatrixCursor(projection ?: DEFAULT_ROOT_COLUMNS).apply {
             newRow().apply {
@@ -52,12 +67,7 @@ class HmaDocumentsProvider : DocumentsProvider() {
         sortOrder: String?
     ): Cursor {
         val result = MatrixCursor(projection ?: DEFAULT_DOCUMENT_COLUMNS)
-        val parentFile = if (parentDocumentId == "/") {
-            File(context!!.filesDir, "HMA Helper/data/export")
-        } else {
-            File(parentDocumentId)
-        } ?: throw FileNotFoundException("Parent not found")
-
+        val parentFile = resolveDocument(parentDocumentId)
         parentFile.takeIf { it.exists() }?.listFiles()?.forEach { file ->
             includeFile(result, file)
         }
@@ -66,7 +76,7 @@ class HmaDocumentsProvider : DocumentsProvider() {
 
     override fun queryDocument(documentId: String, projection: Array<String>?): Cursor {
         val result = MatrixCursor(projection ?: DEFAULT_DOCUMENT_COLUMNS)
-        val file = File(documentId)
+        val file = resolveDocument(documentId)
         if (file.exists()) includeFile(result, file)
         return result
     }
@@ -76,7 +86,7 @@ class HmaDocumentsProvider : DocumentsProvider() {
         mode: String,
         signal: CancellationSignal?
     ): ParcelFileDescriptor {
-        val file = File(documentId)
+        val file = resolveDocument(documentId)
         if (!file.exists()) throw FileNotFoundException("$documentId not found")
         return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
     }

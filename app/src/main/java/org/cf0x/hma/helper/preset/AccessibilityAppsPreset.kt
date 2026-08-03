@@ -22,4 +22,12 @@ class AccessibilityAppsPreset(private val presetManager: PresetManager) : BasePr
         if (result) Log.i(TAG, "MATCH $pkgName")
         return result
     }
+
+    override fun canBeAddedViaRoot(pkg: String, info: RootAppInfo): Boolean {
+        if (info.hasAccessibilityService) {
+            Log.i(TAG, "MATCH (root:accessibility) $pkg")
+            return true
+        }
+        return false
+    }
 }

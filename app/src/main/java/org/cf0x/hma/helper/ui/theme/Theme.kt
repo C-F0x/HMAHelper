@@ -37,6 +37,10 @@ fun HMAHelperTheme(
         ThemeMode.DARK   -> true
     }
 
+    // Use the theme-declared font (follows ROM custom fonts) instead of the
+    // static Compose default.
+    val systemFont = remember(context) { systemFontFamily(context) }
+
     val effectiveSeed = remember(colorSource, isDark) {
         if (colorSource == ColorSource.MONET && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val scheme = if (isDark) dynamicDarkColorScheme(context)
@@ -52,7 +56,7 @@ fun HMAHelperTheme(
         isDark       = isDark,
         animate      = true,
         style        = paletteStyle,
-        typography   = expressiveTypography(),
+        typography   = expressiveTypography(systemFont),
         shapes       = Shapes
     ) {
         Surface(

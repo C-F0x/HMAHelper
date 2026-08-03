@@ -1,6 +1,5 @@
 package org.cf0x.hma.helper
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,12 +43,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.cf0x.hma.helper.ui.components.Md3Toast
 import org.cf0x.hma.helper.ui.components.SegmentSwitch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TemplateCreateScreen(
     selectedApps: List<String> = emptyList(),
+    appsPicked: Int = 0,
     editTemplateName: String? = null,
     onBackClick: () -> Unit,
     onSelectAppsClick: () -> Unit,
@@ -65,11 +66,13 @@ fun TemplateCreateScreen(
 
     var templateName by rememberSaveable { mutableStateOf("") }
     var isWhitelist by rememberSaveable { mutableStateOf(false) }
-    var apps by remember { mutableStateOf(emptyList<String>()) }
+    var apps by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var nameError by rememberSaveable { mutableStateOf<String?>(null) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
-    // Populate from existing template once data is loaded
+    // Populate from existing template once data is loaded.
+    // For edits, wait until the template is actually present in the list
+    // (templates load asynchronously from DataStore) — do NOT lock early.
     var templatePopulated by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(templates, editTemplateName) {
         if (!templatePopulated) {
@@ -78,14 +81,20 @@ fun TemplateCreateScreen(
                 templateName = existing.name
                 isWhitelist = existing.isWhitelist
                 apps = existing.appList
+                templatePopulated = true
+            } else if (editTemplateName == null) {
+                // Creating a new template: nothing to wait for.
+                templatePopulated = true
             }
-            templatePopulated = true
         }
     }
 
-    // Apply selectedApps from navigation when returning from app picker
-    LaunchedEffect(selectedApps) {
-        if (selectedApps.isNotEmpty()) {
+    // Apply the full selection list returned from the app picker.
+    // `appsPicked` (incremented on every picker confirm) distinguishes a real
+    // picker result from the initial empty value, so it never wipes the
+    // template's existing app list when the screen is first opened.
+    LaunchedEffect(appsPicked) {
+        if (appsPicked > 0) {
             apps = selectedApps
         }
     }
@@ -121,10 +130,10 @@ fun TemplateCreateScreen(
                         )
                         if (editTemplateName != null) {
                             viewModel.updateTemplate(editTemplateName, t)
-                            Toast.makeText(context, context.getString(R.string.template_updated), Toast.LENGTH_SHORT).show()
+                            Md3Toast.show(context, context.getString(R.string.template_updated))
                         } else {
                             viewModel.addTemplate(t)
-                            Toast.makeText(context, context.getString(R.string.template_created), Toast.LENGTH_SHORT).show()
+                            Md3Toast.show(context, context.getString(R.string.template_created))
                         }
                         onBackClick()
                     }) {
@@ -193,7 +202,12 @@ fun TemplateCreateScreen(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(stringResource(R.string.template_app_list), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                        TextButton(onClick = onSelectAppsClick) { Text(stringResource(R.string.config_select_extra)) }
+                        TextButton(onClick = {
+                            // Pre-seed the picker with the current apps so the
+                            // returned selection is the complete final list.
+                            viewModel.setSelection(apps)
+                            onSelectAppsClick()
+                        }) { Text(stringResource(R.string.config_select_extra)) }
                     }
                     if (apps.isEmpty()) {
                         Text(

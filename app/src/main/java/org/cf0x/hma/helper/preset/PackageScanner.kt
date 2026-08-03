@@ -4,9 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.nio.charset.StandardCharsets
+import org.cf0x.hma.helper.root.RootShell
 
 /**
  * Multi-path package name scanner.
@@ -21,11 +19,12 @@ object PackageScanner {
         val found = mutableSetOf<String>()
         val pm = context.packageManager
 
-        // Path 1: shell `pm list packages` (bypasses Java PM hooks entirely)
+        // Path 1: shell `pm list packages` (bypasses Java PM hooks entirely).
+        // Runs via RootShell so a hung pm process cannot block us forever.
         runCatching {
-            val p = Runtime.getRuntime().exec("pm list packages")
-            BufferedReader(InputStreamReader(p.inputStream, StandardCharsets.UTF_8)).use { br ->
-                br.lines().forEach { line ->
+            val out = RootShell.execDirect("pm list packages")
+            if (out != null) {
+                out.lineSequence().forEach { line ->
                     val trimmed = line.trim()
                     if (trimmed.startsWith("package:") && trimmed.length > 8) {
                         val pkg = trimmed.substring(8).trim()
@@ -33,7 +32,6 @@ object PackageScanner {
                     }
                 }
             }
-            p.destroy()
         }.onFailure { e ->
             Log.w(TAG, "pm list packages failed: ${e.message}")
         }

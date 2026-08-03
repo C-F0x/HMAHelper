@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.outlined.Colorize
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -32,15 +33,19 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.materialkolor.PaletteStyle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import org.cf0x.hma.helper.data.AppLocale
 import org.cf0x.hma.helper.data.AppSettings
 import org.cf0x.hma.helper.data.ColorSource
 import org.cf0x.hma.helper.data.ThemeMode
+import org.cf0x.hma.helper.root.RootShell
 import org.cf0x.hma.helper.ui.components.ColorPickerWheel
 import org.cf0x.hma.helper.ui.components.SegmentSwitch
 import org.cf0x.hma.helper.util.applyLocale
@@ -49,6 +54,7 @@ import org.cf0x.hma.helper.util.applyLocale
 @Composable
 fun SettingsScreen(
     appSettings: AppSettings,
+    appManagerVM: AppManagerViewModel,
     onBackClick: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -62,12 +68,27 @@ fun SettingsScreen(
     var savedColor   by remember { mutableStateOf(Color(0xFF6750A4)) }
     val appLocale    by appSettings.appLocale.collectAsState(initial = AppLocale.SYSTEM)
     var paletteStyle by remember { mutableStateOf(PaletteStyle.TonalSpot) }
+    var manageHmaConfig by remember { mutableStateOf(false) }
+    var showImportExport by remember { mutableStateOf(true) }
+    var rootAvailable by remember { mutableStateOf(false) }
+    var rootCheckDone by remember { mutableStateOf(false) }
+    var showManageHmaConfirm by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         themeMode    = appSettings.themeMode.first()
         colorSource  = appSettings.colorSource.first()
         savedColor   = appSettings.presetColor.first()
         paletteStyle = appSettings.paletteStyle.first()
+        manageHmaConfig = appSettings.manageHmaConfig.first()
+        showImportExport = appSettings.showImportExport.first()
+        rootAvailable = withContext(Dispatchers.IO) { RootShell.isRootAvailable() }
+        rootCheckDone = true
+        // Root was revoked after the user had enabled takeover: roll back the
+        // checkbox automatically so it can't stay stuck on without root.
+        if (!rootAvailable && manageHmaConfig) {
+            manageHmaConfig = false
+            scope.launch { appSettings.saveManageHmaConfig(false) }
+        }
         loaded       = true
     }
 
@@ -105,6 +126,105 @@ fun SettingsScreen(
             // --- Group: About ---
             SettingGroup {
                 AboutItem(context)
+            }
+
+            // --- Group: Work Mode (root / normal) ---
+            SettingGroup {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    // Work Mode header with the root indicator as its subtitle
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Security,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Column {
+                            Text(
+                                text = stringResource(R.string.setting_work_mode),
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            if (rootCheckDone) {
+                                Text(
+                                    text = if (rootAvailable) stringResource(R.string.work_mode_root_available)
+                                    else stringResource(R.string.work_mode_root_unavailable),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (rootAvailable) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                    }
+
+                    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+                    // Show Import / Export buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                stringResource(R.string.setting_show_import_export),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                        Switch(
+                            checked = showImportExport,
+                            onCheckedChange = { checked ->
+                                scope.launch { appSettings.saveShowImportExport(checked) }
+                                showImportExport = checked
+                            }
+                        )
+                    }
+
+                    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+
+                    // Manage HMA config (root-gated)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                stringResource(R.string.manage_hma_config),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = if (rootCheckDone && !rootAvailable)
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
+                                else MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = if (rootCheckDone && !rootAvailable)
+                                    stringResource(R.string.work_mode_root_unavailable)
+                                else stringResource(R.string.manage_hma_config_desc),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (rootCheckDone && !rootAvailable)
+                                    MaterialTheme.colorScheme.error
+                                else MaterialTheme.colorScheme.outline
+                            )
+                        }
+                        Switch(
+                            checked = manageHmaConfig,
+                            enabled = rootCheckDone && rootAvailable,
+                            onCheckedChange = { checked ->
+                                if (checked) {
+                                    // Second confirmation: enabling overwrites
+                                    // HMA's existing config on the next push.
+                                    showManageHmaConfirm = true
+                                } else {
+                                    scope.launch { appSettings.saveManageHmaConfig(false) }
+                                    manageHmaConfig = false
+                                }
+                            }
+                        )
+                    }
+                }
             }
 
             // --- Group: Theme Color & Style ---
@@ -183,6 +303,31 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(32.dp))
         }
     }
+
+    // ── Manage HMA config confirmation dialog ──
+    if (showManageHmaConfirm) {
+        AlertDialog(
+            onDismissRequest = { showManageHmaConfirm = false },
+            shape = MaterialTheme.shapes.extraLarge,
+            title = { Text(stringResource(R.string.manage_hma_config)) },
+            text = {
+                Text(stringResource(R.string.manage_hma_config_confirm, context.getString(R.string.app_name)))
+            },
+            confirmButton = {
+                Button(onClick = {
+                    showManageHmaConfirm = false
+                    scope.launch { appSettings.saveManageHmaConfig(true) }
+                    manageHmaConfig = true
+                    appManagerVM.pushToHmaNow()
+                }) { Text(stringResource(R.string.card_add_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showManageHmaConfirm = false }) {
+                    Text(stringResource(R.string.card_add_cancel))
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -248,7 +393,11 @@ private fun PaletteStyleItem(current: PaletteStyle, onSelect: (PaletteStyle) -> 
                 modifier = Modifier.size(20.dp)
             )
             Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.setting_palette_style), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.setting_palette_style),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
                 if (!expanded) {
                     Text(
                         options.firstOrNull { it.first == current }?.second ?: current.name,
@@ -318,6 +467,7 @@ private fun LanguageItem(appSettings: AppSettings, appLocale: AppLocale) {
                 Text(
                     stringResource(R.string.setting_language),
                     style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 if (!expanded) {
@@ -379,7 +529,10 @@ private fun AboutItem(context: android.content.Context) {
     }
 
     Column(
-        modifier = Modifier.clickable { openGitHub() }
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.extraLarge)
+            .clickable { openGitHub() }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

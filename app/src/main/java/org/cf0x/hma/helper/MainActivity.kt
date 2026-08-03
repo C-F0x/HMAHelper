@@ -1,10 +1,15 @@
 package org.cf0x.hma.helper
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -20,12 +25,30 @@ import org.cf0x.hma.helper.data.AppSettings
 import org.cf0x.hma.helper.data.ColorSource
 import org.cf0x.hma.helper.data.ThemeMode
 import org.cf0x.hma.helper.ui.theme.HMAHelperTheme
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
 
     private lateinit var appSettings: AppSettings
+    private val appManagerVM: AppManagerViewModel by viewModels()
+    private val presetVM: PresetViewModel by viewModels()
+
+    /**
+     * Auto-refresh on package install/uninstall/replace: keeps the app list
+     * and smart-classification counts fresh without manual refresh.
+     */
+    private val packageReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val action = intent?.action ?: return
+            if (action == Intent.ACTION_PACKAGE_ADDED ||
+                action == Intent.ACTION_PACKAGE_REMOVED ||
+                action == Intent.ACTION_PACKAGE_REPLACED
+            ) {
+                appManagerVM.reload()
+                presetVM.reload()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,9 +68,30 @@ class MainActivity : ComponentActivity() {
                 seedColor    = presetColor,
                 paletteStyle = paletteStyle,
             ) {
-                AppNavigation(appSettings)
+                AppNavigation(appSettings, appManagerVM, presetVM)
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_PACKAGE_ADDED)
+            addAction(Intent.ACTION_PACKAGE_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_REPLACED)
+            addDataScheme("package")
+        }
+        if (Build.VERSION.SDK_INT >= 33) {
+            registerReceiver(packageReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            registerReceiver(packageReceiver, filter)
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        runCatching { unregisterReceiver(packageReceiver) }
     }
 
     override fun onResume() {
@@ -71,10 +115,13 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AppNavigation(appSettings: AppSettings) {
+fun AppNavigation(
+    appSettings: AppSettings,
+    appManagerVM: AppManagerViewModel,
+    presetVM: PresetViewModel
+) {
     val navController = rememberNavController()
-    val appManagerVM: AppManagerViewModel = viewModel()
-    
+
     NavHost(
         navController = navController,
         startDestination = "main"
@@ -82,6 +129,7 @@ fun AppNavigation(appSettings: AppSettings) {
         composable("main") {
             MainScreen(
                 appSettings = appSettings,
+                viewModel = presetVM,
                 appManagerVM = appManagerVM,
                 onSettingsClick = {
                     navController.navigate("settings")
@@ -100,6 +148,7 @@ fun AppNavigation(appSettings: AppSettings) {
         composable("settings") {
             SettingsScreen(
                 appSettings = appSettings,
+                appManagerVM = appManagerVM,
                 onBackClick = {
                     navController.popBackStack()
                 }
@@ -112,6 +161,7 @@ fun AppNavigation(appSettings: AppSettings) {
             val name = backStackEntry.arguments?.getString("name") ?: return@composable
             PresetScreen(
                 presetName = name,
+                viewModel = presetVM,
                 onBackClick = { navController.popBackStack() }
             )
         }
@@ -199,9 +249,12 @@ fun AppNavigation(appSettings: AppSettings) {
         composable("template_create") { entry ->
             val appResult by entry.savedStateHandle.getStateFlow<List<String>>("template_apps", emptyList())
                 .collectAsState()
+            val appsPicked by entry.savedStateHandle.getStateFlow<Int>("template_apps_picked", 0)
+                .collectAsState()
             TemplateCreateScreen(
                 viewModel = appManagerVM,
                 selectedApps = appResult,
+                appsPicked = appsPicked,
                 onBackClick = { navController.popBackStack() },
                 onSelectAppsClick = {
                     navController.navigate("template_app_select")
@@ -215,9 +268,12 @@ fun AppNavigation(appSettings: AppSettings) {
             val editName = backStackEntry.arguments?.getString("name") ?: return@composable
             val appResult by backStackEntry.savedStateHandle.getStateFlow<List<String>>("template_apps", emptyList())
                 .collectAsState()
+            val appsPicked by backStackEntry.savedStateHandle.getStateFlow<Int>("template_apps_picked", 0)
+                .collectAsState()
             TemplateCreateScreen(
                 viewModel = appManagerVM,
                 selectedApps = appResult,
+                appsPicked = appsPicked,
                 editTemplateName = editName,
                 onBackClick = { navController.popBackStack() },
                 onSelectAppsClick = {
@@ -231,7 +287,10 @@ fun AppNavigation(appSettings: AppSettings) {
                 titleRes = R.string.app_manager_title,
                 onBackClick = { navController.popBackStack() },
                 onExtraConfirm = { selected ->
-                    navController.previousBackStackEntry?.savedStateHandle?.set("template_apps", selected)
+                    navController.previousBackStackEntry?.savedStateHandle?.apply {
+                        set("template_apps", selected)
+                        set("template_apps_picked", (get<Int>("template_apps_picked") ?: 0) + 1)
+                    }
                     navController.popBackStack()
                 }
             )

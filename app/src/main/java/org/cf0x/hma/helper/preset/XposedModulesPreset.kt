@@ -23,4 +23,20 @@ class XposedModulesPreset : BasePreset(NAME) {
         }
         return false
     }
+
+    override fun canBeAddedViaRoot(pkg: String, info: RootAppInfo): Boolean {
+        if (info.hasLibXposedProvider) {
+            Log.i(TAG, "MATCH (root:libxposed) $pkg")
+            return true
+        }
+        if (info.metaKeys.contains("xposedminversion")) {
+            Log.i(TAG, "MATCH (root:xposedminversion) $pkg")
+            return true
+        }
+        if (info.metaKeys.contains("xposeddescription")) {
+            Log.i(TAG, "MATCH (root:xposeddescription) $pkg")
+            return true
+        }
+        return false
+    }
 }

@@ -49,6 +49,8 @@ class AppSettings(private val context: Context) {
         val MAX_LOG_SIZE       = intPreferencesKey("max_log_size")
         val FORCE_MOUNT_DATA   = booleanPreferencesKey("force_mount_data")
         val AGGRESSIVE_FILTER  = booleanPreferencesKey("aggressive_filter")
+        val MANAGE_HMA_CONFIG  = booleanPreferencesKey("manage_hma_config")
+        val SHOW_IMPORT_EXPORT = booleanPreferencesKey("show_import_export")
     }
 
     val themeMode: Flow<ThemeMode> = context.dataStore.data.map { p ->
@@ -120,9 +122,19 @@ class AppSettings(private val context: Context) {
         p[Keys.AGGRESSIVE_FILTER] ?: false
     }
 
+    val manageHmaConfig: Flow<Boolean> = context.dataStore.data.map { p ->
+        p[Keys.MANAGE_HMA_CONFIG] ?: false
+    }
+
+    val showImportExport: Flow<Boolean> = context.dataStore.data.map { p ->
+        p[Keys.SHOW_IMPORT_EXPORT] ?: true
+    }
+
     suspend fun saveConfigVersion(v: Int)    = context.dataStore.edit { it[Keys.CONFIG_VERSION] = v }
     suspend fun saveDetailLog(v: Boolean)    = context.dataStore.edit { it[Keys.DETAIL_LOG] = v }
     suspend fun saveMaxLogSize(v: Int)       = context.dataStore.edit { it[Keys.MAX_LOG_SIZE] = v }
     suspend fun saveForceMountData(v: Boolean)= context.dataStore.edit { it[Keys.FORCE_MOUNT_DATA] = v }
     suspend fun saveAggressiveFilter(v: Boolean)= context.dataStore.edit { it[Keys.AGGRESSIVE_FILTER] = v }
+    suspend fun saveManageHmaConfig(v: Boolean)= context.dataStore.edit { it[Keys.MANAGE_HMA_CONFIG] = v }
+    suspend fun saveShowImportExport(v: Boolean)= context.dataStore.edit { it[Keys.SHOW_IMPORT_EXPORT] = v }
 }

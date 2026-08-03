@@ -17,6 +17,8 @@
     <string name="dialog_message_import">デバイスからJSON設定ファイルをインポートします。</string>
     <string name="dialog_message_export">現在の設定をJSONファイルとしてエクスポートします。</string>
     <string name="dialog_cancel">キャンセル</string>
+    <string name="export_failed">エクスポートに失敗しました</string>
+    <string name="import_failed">インポートに失敗しました</string>
     <string name="config_work_mode">動作モード</string>
     <string name="config_blacklist">ブラックリスト</string>
     <string name="config_whitelist">ホワイトリスト</string>
@@ -30,6 +32,7 @@
     <string name="main_template_create">カスタムテンプレート</string>
     <string name="app_manager_search">アプリを検索…</string>
     <string name="app_manager_tab_user">ユーザー</string>
+    <string name="app_manager_selected_count">%d 個選択中</string>
     <string name="app_manager_tab_system">システム</string>
     <string name="setting_language">言語</string>
     <string name="setting_language_system">システムデフォルト</string>
@@ -94,6 +97,27 @@
     <!-- App manager -->
     <string name="app_auto_removed">自動的に削除されました: %s</string>
 
+    <!-- Work mode / Root / OOBE -->
+    <string name="setting_work_mode">動作モード</string>
+    <string name="setting_show_import_export">インポート/エクスポートボタンを表示</string>
+    <string name="work_mode_root_available">Root 権限を検出しました</string>
+    <string name="work_mode_root_unavailable">Root 権限を検出できません</string>
+    <string name="manage_hma_config">HMA 設定を管理</string>
+    <string name="manage_hma_config_confirm">有効にすると次回プッシュ時に Hide My Applist の既存設定が上書きされます。保持したい場合は先に %1$s へ移行してください。</string>
+    <string name="manage_hma_config_desc">root で Hide My Applist の config.json を直接読み書きします</string>
+    <string name="hma_sync_title">設定を HMA に書き込みました</string>
+    <string name="hma_sync_message">設定は HMA の config.json に書き込まれました。Hide My Applist を再起動すると反映されます。</string>
+    <string name="hma_restart_button">HMA を再起動</string>
+    <string name="hma_action_add_scope">スコープを追加</string>
+    <string name="hma_action_remove_scope">スコープを削除</string>
+    <string name="hma_action_modify_scope">スコープを変更</string>
+    <string name="hma_action_add_template">テンプレートを追加</string>
+    <string name="hma_action_remove_template">テンプレートを削除</string>
+    <string name="hma_action_modify_template">テンプレートを変更</string>
+    <string name="hma_toast_n_apps">%d 個のアプリ</string>
+    <string name="hma_force_stop_toast">HideMyApplist を強制終了, Pid:%s</string>
+    <string name="hma_restart_toast">HideMyApplist を再起動, Pid:%s</string>
+
     <!-- Config editing -->
     <string name="config_editing_count">%d 個のアプリを編集中</string>
     <string name="config_select_extra">選択</string>
@@ -117,4 +141,29 @@
     <string name="desc_add">追加</string>
     <string name="desc_deselect">選択解除</string>
     <string name="desc_create_template">テンプレートを作成</string>
+    <string name="color_hex_label">16進数</string>
+    <string name="color_hex_invalid">無効な16進数です。形式: #RRGGBB</string>
+
+    <!-- Missing keys backfill -->
+    <string name="misc_config">その他設定</string>
+    <string name="misc_config_version">configVersion</string>
+    <string name="misc_detail_log">detailLog</string>
+    <string name="misc_max_log_size">maxLogSize</string>
+    <string name="misc_max_log_size_k">%dK</string>
+    <string name="misc_force_mount_data">forceMountData</string>
+    <string name="misc_aggressive_filter">aggressiveFilter</string>
+    <string name="misc_aggressive_filter_hint">用途不明のため、安全のため無効化されています</string>
+    <string name="dialog_export_saf">SAF エクスポート</string>
+    <string name="dialog_export_quick">クイックエクスポート</string>
+    <string name="dialog_export_quick_done">共有ディレクトリにエクスポートしました</string>
+    <string name="dialog_import_overwrite">上書き（クリアしてインポート）</string>
+    <string name="dialog_import_overwrite_hint">スマート分類は常に競合設定を上書きします</string>
+    <string name="dialog_import_preview_title">インポートプレビュー</string>
+    <string name="dialog_import_preview_templates">テンプレート: %d</string>
+    <string name="dialog_import_preview_scope">スコープアプリ: %d</string>
+    <string name="dialog_import_preview_corrupt">設定が破損しています</string>
+    <string name="dialog_import_confirm">インポート</string>
+    <string name="dialog_import_removed_scope">存在しない %d 個のスコープアプリを削除しました</string>
+    <string name="scope_config_count">テンプレート: %1$d  追加: %2$d</string>
+    <string name="app_manager_title">アプリ一覧</string>
 </resources>

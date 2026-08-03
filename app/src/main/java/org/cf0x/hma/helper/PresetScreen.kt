@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -144,7 +145,7 @@ private fun PresetAppListItem(
         modifier = Modifier
             .fillMaxWidth()
             .alpha(alpha)
-            .then(if (item.isInstalled) Modifier.clickable { onClick() } else Modifier),
+            .then(if (item.isInstalled) Modifier.clip(MaterialTheme.shapes.medium).clickable { onClick() } else Modifier),
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer

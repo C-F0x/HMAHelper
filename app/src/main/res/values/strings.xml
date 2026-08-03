@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">HMA Helper</string>
-    <string name="version_compat" translatable="false">[3.8.1-509]</string>
+    <string name="version_compat" translatable="false">[V3.8.3-520]</string>
     <string name="version_compat_label">Compat Version: %s</string>
     <string name="github_url" translatable="false">https://github.com/C-F0x/HMAHelper</string>
     <string name="github_author" translatable="false">C-F0x@GitHub</string>
@@ -44,6 +44,8 @@
     <string name="dialog_import_confirm">Import</string>
     <string name="dialog_import_removed_scope">Removed %d missing scope app(s)</string>
     <string name="dialog_cancel">Cancel</string>
+    <string name="export_failed">Export failed</string>
+    <string name="import_failed">Import failed</string>
 
     <!-- Scope settings -->
     <string name="scope_empty">No scope configurations. Tap + to add one.</string>
@@ -71,7 +73,29 @@
 
     <!-- App manager -->
     <string name="app_manager_title">App List</string>
+    <string name="app_manager_selected_count">Selected %d apps</string>
     <string name="app_auto_removed">Auto-removed: %s</string>
+
+    <!-- Work mode / Root / OOBE -->
+    <string name="setting_work_mode">Work Mode</string>
+    <string name="setting_show_import_export">Show Import / Export buttons</string>
+    <string name="work_mode_root_available">Root access detected</string>
+    <string name="work_mode_root_unavailable">No root access detected</string>
+    <string name="manage_hma_config">Manage HMA Config</string>
+    <string name="manage_hma_config_confirm">This will overwrite Hide My Applist\'s existing config on the next push. Please back it up or migrate it to %1$s first if you want to keep it.</string>
+    <string name="manage_hma_config_desc">Directly read/write Hide My Applist\'s config.json via root</string>
+    <string name="hma_sync_title">Config written to HMA</string>
+    <string name="hma_sync_message">The config has been written to HMA\'s config.json. Restart Hide My Applist for the changes to take effect.</string>
+    <string name="hma_restart_button">Restart HMA</string>
+    <string name="hma_action_add_scope">Added scope</string>
+    <string name="hma_action_remove_scope">Removed scope</string>
+    <string name="hma_action_modify_scope">Modified scope</string>
+    <string name="hma_action_add_template">Added template</string>
+    <string name="hma_action_remove_template">Removed template</string>
+    <string name="hma_action_modify_template">Modified template</string>
+    <string name="hma_toast_n_apps">%d apps</string>
+    <string name="hma_force_stop_toast">Force-stopped HideMyApplist, Pid:%s</string>
+    <string name="hma_restart_toast">Relaunched HideMyApplist, Pid:%s</string>
 
     <string name="config_work_mode">Work Mode</string>
     <string name="config_blacklist">Blacklist</string>
@@ -164,4 +188,6 @@
     <string name="desc_add">Add</string>
     <string name="desc_deselect">Deselect</string>
     <string name="desc_create_template">Create Template</string>
+    <string name="color_hex_label">Hex</string>
+    <string name="color_hex_invalid">Invalid hex, format: #RRGGBB</string>
 </resources>

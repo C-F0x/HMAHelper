@@ -137,13 +137,12 @@ fun AppConfigScreen(
                             contentDescription = stringResource(R.string.desc_save)
                         )
                     }
-                    if (!isMultiEdit) {
-                        IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = stringResource(R.string.desc_delete)
-                            )
-                        }
+                    // Delete works for single AND batch (multi-select) editing.
+                    IconButton(onClick = { showDeleteDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete,
+                            contentDescription = stringResource(R.string.desc_delete)
+                        )
                     }
                 }
             )

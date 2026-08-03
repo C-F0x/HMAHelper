@@ -17,6 +17,8 @@
     <string name="dialog_message_import">기기에서 JSON 설정 파일을 가져옵니다.</string>
     <string name="dialog_message_export">현재 설정을 JSON 파일로 내보냅니다.</string>
     <string name="dialog_cancel">취소</string>
+    <string name="export_failed">내보내기 실패</string>
+    <string name="import_failed">가져오기 실패</string>
     <string name="config_work_mode">작업 모드</string>
     <string name="config_blacklist">블랙리스트</string>
     <string name="config_whitelist">화이트리스트</string>
@@ -30,6 +32,7 @@
     <string name="main_template_create">사용자 정의 템플릿</string>
     <string name="app_manager_search">앱 검색…</string>
     <string name="app_manager_tab_user">사용자</string>
+    <string name="app_manager_selected_count">%d개 선택됨</string>
     <string name="app_manager_tab_system">시스템</string>
     <string name="setting_language">언어</string>
     <string name="setting_language_system">시스템 기본값</string>
@@ -94,6 +97,27 @@
     <!-- App manager -->
     <string name="app_auto_removed">자동 제거됨: %s</string>
 
+    <!-- Work mode / Root / OOBE -->
+    <string name="setting_work_mode">작업 모드</string>
+    <string name="setting_show_import_export">가져오기/내보내기 버튼 표시</string>
+    <string name="work_mode_root_available">Root 권한이 감지되었습니다</string>
+    <string name="work_mode_root_unavailable">Root 권한이 감지되지 않았습니다</string>
+    <string name="manage_hma_config">HMA 설정 관리</string>
+    <string name="manage_hma_config_confirm">활성화하면 다음 푸시 시 Hide My Applist의 기존 설정이 덮어써집니다. 유지하려면 먼저 %1$s로 마이그레이션하세요.</string>
+    <string name="manage_hma_config_desc">root로 Hide My Applist의 config.json을 직접 읽고 씁니다</string>
+    <string name="hma_sync_title">설정이 HMA에 기록되었습니다</string>
+    <string name="hma_sync_message">설정이 HMA의 config.json에 기록되었습니다. Hide My Applist를 재시작하면 적용됩니다.</string>
+    <string name="hma_restart_button">HMA 재시작</string>
+    <string name="hma_action_add_scope">범위 추가</string>
+    <string name="hma_action_remove_scope">범위 제거</string>
+    <string name="hma_action_modify_scope">범위 수정</string>
+    <string name="hma_action_add_template">템플릿 추가</string>
+    <string name="hma_action_remove_template">템플릿 제거</string>
+    <string name="hma_action_modify_template">템플릿 수정</string>
+    <string name="hma_toast_n_apps">%d개 앱</string>
+    <string name="hma_force_stop_toast">HideMyApplist 강제 종료, Pid:%s</string>
+    <string name="hma_restart_toast">HideMyApplist 다시 시작, Pid:%s</string>
+
     <!-- Config editing -->
     <string name="config_editing_count">%d개 앱 편집 중</string>
     <string name="config_select_extra">선택</string>
@@ -117,4 +141,29 @@
     <string name="desc_add">추가</string>
     <string name="desc_deselect">선택 해제</string>
     <string name="desc_create_template">템플릿 생성</string>
+    <string name="color_hex_label">16진수</string>
+    <string name="color_hex_invalid">잘못된 16진수입니다. 형식: #RRGGBB</string>
+
+    <!-- Missing keys backfill -->
+    <string name="misc_config">기타 설정</string>
+    <string name="misc_config_version">configVersion</string>
+    <string name="misc_detail_log">detailLog</string>
+    <string name="misc_max_log_size">maxLogSize</string>
+    <string name="misc_max_log_size_k">%dK</string>
+    <string name="misc_force_mount_data">forceMountData</string>
+    <string name="misc_aggressive_filter">aggressiveFilter</string>
+    <string name="misc_aggressive_filter_hint">용도가 불명확하여 안전을 위해 비활성화됨</string>
+    <string name="dialog_export_saf">SAF 내보내기</string>
+    <string name="dialog_export_quick">빠른 내보내기</string>
+    <string name="dialog_export_quick_done">공유 디렉토리로 내보냈습니다</string>
+    <string name="dialog_import_overwrite">덮어쓰기（지우고 가져오기）</string>
+    <string name="dialog_import_overwrite_hint">스마트 분류는 항상 충돌 설정을 덮어씁니다</string>
+    <string name="dialog_import_preview_title">가져오기 미리보기</string>
+    <string name="dialog_import_preview_templates">템플릿: %d</string>
+    <string name="dialog_import_preview_scope">범위 앱: %d</string>
+    <string name="dialog_import_preview_corrupt">설정이 손상되었습니다</string>
+    <string name="dialog_import_confirm">가져오기</string>
+    <string name="dialog_import_removed_scope">누락된 범위 앱 %d개를 제거했습니다</string>
+    <string name="scope_config_count">템플릿: %1$d  추가: %2$d</string>
+    <string name="app_manager_title">앱 목록</string>
 </resources>
