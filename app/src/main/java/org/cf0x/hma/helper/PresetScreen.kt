@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
+import org.cf0x.hma.helper.ui.components.AppIconWithFlip
 import androidx.activity.compose.BackHandler
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -127,18 +128,6 @@ private fun PresetAppListItem(
     item: PresetAppItem,
     onClick: () -> Unit
 ) {
-    val context = LocalContext.current
-    var iconBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
-
-    LaunchedEffect(item.packageName) {
-        if (item.isInstalled) {
-            val drawable = runCatching {
-                context.packageManager.getApplicationIcon(item.packageName)
-            }.getOrNull()
-            iconBitmap = drawable?.toBitmap(48, 48, null)
-        }
-    }
-
     val alpha = if (item.isInstalled) 1f else 0.45f
 
     Card(
@@ -158,29 +147,7 @@ private fun PresetAppListItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val icon = iconBitmap
-            if (icon != null) {
-                Image(
-                    bitmap = icon.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier.size(40.dp)
-                )
-            } else {
-                Surface(
-                    modifier = Modifier.size(40.dp),
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                ) {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            }
+            AppIconWithFlip(packageName = item.packageName, flipSelected = false, size = 40.dp)
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(

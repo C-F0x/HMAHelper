@@ -7,6 +7,8 @@ object PresetNaming {
     const val PREFIX = "HMAH_"
     private const val WHITELIST_SUFFIX = "_whitelist"
 
+    private val localeLabelsCache = mutableMapOf<Int, Set<String>>()
+
     data class PresetInfo(val id: String, val labelRes: Int)
 
     // All 6 presets in order
@@ -58,6 +60,9 @@ object PresetNaming {
     }
 
     private fun getLabelsForAllLocales(context: Context, labelRes: Int): Set<String> {
+        // Results are locale-explicit, so they're identical for any app locale —
+        // cache them instead of rebuilding 6 Configurations per call.
+        localeLabelsCache[labelRes]?.let { return it }
         val labels = mutableSetOf<String>()
         val locales = listOf(
             java.util.Locale.ENGLISH,
@@ -74,6 +79,9 @@ object PresetNaming {
                 val localizedResources = context.createConfigurationContext(config).resources
                 labels.add(localizedResources.getString(labelRes))
             } catch (_: Exception) { }
+        }
+        synchronized(localeLabelsCache) {
+            localeLabelsCache[labelRes] = labels
         }
         return labels
     }

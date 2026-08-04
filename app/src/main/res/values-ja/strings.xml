@@ -84,6 +84,7 @@
     <string name="template_name">テンプレート名</string>
     <string name="template_name_empty">名前は空にできません</string>
     <string name="template_name_duplicate">名前は既に使用されています</string>
+    <string name="template_name_invalid_chars">名前に | , : や改行は使用できません</string>
     <string name="template_app_list">アプリ一覧</string>
     <string name="template_no_apps">アプリが選択されていません</string>
     <string name="template_created">テンプレートを作成しました</string>
@@ -141,6 +142,7 @@
     <string name="desc_add">追加</string>
     <string name="desc_deselect">選択解除</string>
     <string name="desc_create_template">テンプレートを作成</string>
+    <string name="documents_summary">設定のエクスポート</string>
     <string name="color_hex_label">16進数</string>
     <string name="color_hex_invalid">無効な16進数です。形式: #RRGGBB</string>
 

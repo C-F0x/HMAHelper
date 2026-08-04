@@ -84,6 +84,7 @@
     <string name="template_name">模板名稱</string>
     <string name="template_name_empty">名稱不能為空</string>
     <string name="template_name_duplicate">名稱已存在</string>
+    <string name="template_name_invalid_chars">名稱不能包含 | , : 或換行符</string>
     <string name="template_app_list">應用列表</string>
     <string name="template_no_apps">未選擇應用</string>
     <string name="template_created">模板已建立</string>
@@ -141,6 +142,7 @@
     <string name="desc_add">新增</string>
     <string name="desc_deselect">取消選擇</string>
     <string name="desc_create_template">建立模板</string>
+    <string name="documents_summary">設定匯出</string>
     <string name="color_hex_label">十六進位</string>
     <string name="color_hex_invalid">無效的十六進位，格式: #RRGGBB</string>
 

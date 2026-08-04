@@ -180,6 +180,12 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
     fun setSelection(packages: List<String>) { _selectedPackages.value = packages.toSet() }
     fun lastSelectedPackage(): String? = _selectedPackages.value.lastOrNull()
 
+    /** Reset picker-only UI state (tab/search) when entering a fresh picker. */
+    fun resetPickerState() {
+        _selectedTab.value = TAB_USER
+        _searchQuery.value = ""
+    }
+
     fun getConfig(packageName: String): AppScopeConfig? = _scopeConfigs.value[packageName]
 
     fun saveConfig(packageName: String, config: AppScopeConfig) {
@@ -187,6 +193,15 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
         _scopeConfigs.value = _scopeConfigs.value + (packageName to config)
         persistScopeConfigs()
         recordScopeChange(if (isNew) ScopeChangeOp.ADD else ScopeChangeOp.MODIFY, packageName)
+    }
+
+    /**
+     * Persist without recording an HMA change — used for transient saves that
+     * are not user edits (e.g. the "Select extra apps" round-trip).
+     */
+    fun saveConfigSilent(packageName: String, config: AppScopeConfig) {
+        _scopeConfigs.value = _scopeConfigs.value + (packageName to config)
+        persistScopeConfigs()
     }
 
     fun removeConfig(packageName: String) {
@@ -208,17 +223,34 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
     fun removeTemplate(name: String) {
         _templates.value = _templates.value.filter { it.name != name }
         persistTemplates()
+        // Remove dangling references from scope configs.
+        if (_scopeConfigs.value.any { (_, c) -> name in c.enabledTemplates }) {
+            _scopeConfigs.value = _scopeConfigs.value.mapValues { (_, c) ->
+                if (name in c.enabledTemplates) c.copy(enabledTemplates = c.enabledTemplates - name)
+                else c
+            }
+            persistScopeConfigs()
+        }
         recordTemplateChange(TemplateChangeOp.REMOVE, name)
     }
 
     fun updateTemplate(oldName: String, newTemplate: Template) {
         _templates.value = _templates.value.map { if (it.name == oldName) newTemplate else it }
         persistTemplates()
+        // Rename rewrites scope references to the old name.
+        if (oldName != newTemplate.name) {
+            _scopeConfigs.value = _scopeConfigs.value.mapValues { (_, c) ->
+                if (oldName in c.enabledTemplates) c.copy(enabledTemplates = c.enabledTemplates.map { if (it == oldName) newTemplate.name else it })
+                else c
+            }
+            persistScopeConfigs()
+        }
         recordTemplateChange(TemplateChangeOp.MODIFY, newTemplate.name)
     }
 
-    /** Returns the set of reserved template names: preset internal IDs + display labels (EN/CN) + existing templates */
+    /** Returns the set of reserved template names: preset IDs + display labels (EN/CN) + prefixed forms + existing templates */
     fun getReservedNames(): Set<String> {
+        val context = getApplication<Application>()
         val enLabels = setOf(
             "Xposed Modules", "Embedded Xposed", "Managers",
             "Privileged Apps", "Custom ROM", "Accessibility Services"
@@ -228,7 +260,10 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
             "特权软件", "自定义 ROM", "无障碍服务软件"
         )
         val existing = _templates.value.map { it.name }.toSet()
-        return PresetManager.PRESET_NAMES.toSet() + enLabels + cnLabels + existing
+        // Prefixed built-in names must also be reserved, or a custom template
+        // could shadow an exported preset template.
+        val prefixed = PresetNaming.allPrefixedNames(context).keys
+        return PresetManager.PRESET_NAMES.toSet() + enLabels + cnLabels + existing + prefixed
     }
 
     // ── Persistence ──
@@ -307,7 +342,9 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
     private fun recordScopeChange(op: ScopeChangeOp, pkg: String) {
         synchronized(pendingScopePkgs) {
             pendingScopeOp = op
-            pendingScopePkgs.add(pkg)
+            // Deduplicate: the same package may be saved twice in one burst
+            // (e.g. picker round-trips), which would inflate the batch count.
+            if (pkg !in pendingScopePkgs) pendingScopePkgs.add(pkg)
         }
         scheduleHmaPush()
     }
@@ -443,6 +480,8 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
                     val tObj = json.getJSONObject("templates")
                     tObj.keys().forEach { name ->
                         if (PresetNaming.resolveToId(app, name) != null) return@forEach
+                        // Skip names that would corrupt the DataStore encoding.
+                        if (name.any { it == '|' || it == ',' || it == ':' || it == '\n' || it == '\r' || it == '/' || it == '?' || it == '#' || it == '%' }) return@forEach
                         val t = tObj.getJSONObject(name)
                         val appList = mutableListOf<String>()
                         val arr = t.getJSONArray("appList")
@@ -470,7 +509,18 @@ class AppManagerViewModel(application: Application) : AndroidViewModel(applicati
                         val templates = mutableListOf<String>()
                         if (s.has("applyTemplates")) {
                             val arr = s.getJSONArray("applyTemplates")
-                            for (i in 0 until arr.length()) templates.add(arr.getString(i))
+                            for (i in 0 until arr.length()) {
+                                val name = arr.getString(i)
+                                // Cross-locale: prefixed built-in names from
+                                // another language remap to this locale's form,
+                                // so imported scope templates keep working.
+                                val presetId = PresetNaming.resolveToId(app, name)
+                                templates += if (presetId != null) {
+                                    PresetNaming.toPrefixedName(app, presetId, name.endsWith("_whitelist"))
+                                } else {
+                                    name
+                                }
+                            }
                         }
                         val extra = mutableListOf<String>()
                         if (s.has("extraAppList")) {

@@ -48,6 +48,7 @@ import org.cf0x.hma.helper.data.ThemeMode
 import org.cf0x.hma.helper.root.RootShell
 import org.cf0x.hma.helper.ui.components.ColorPickerWheel
 import org.cf0x.hma.helper.ui.components.SegmentSwitch
+import org.cf0x.hma.helper.ui.theme.DefaultSeedColor
 import org.cf0x.hma.helper.util.applyLocale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,7 +66,7 @@ fun SettingsScreen(
 
     var themeMode    by remember { mutableStateOf(ThemeMode.SYSTEM) }
     var colorSource  by remember { mutableStateOf(if (supportsMonet) ColorSource.MONET else ColorSource.PRESET) }
-    var savedColor   by remember { mutableStateOf(Color(0xFF6750A4)) }
+    var savedColor   by remember { mutableStateOf(DefaultSeedColor) }
     val appLocale    by appSettings.appLocale.collectAsState(initial = AppLocale.SYSTEM)
     var paletteStyle by remember { mutableStateOf(PaletteStyle.TonalSpot) }
     var manageHmaConfig by remember { mutableStateOf(false) }
@@ -200,12 +201,12 @@ fun SettingsScreen(
                                 else MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = if (rootCheckDone && !rootAvailable)
-                                    stringResource(R.string.work_mode_root_unavailable)
-                                else stringResource(R.string.manage_hma_config_desc),
+                                // Keep the feature description; the disabled
+                                // state is conveyed by the greyed-out switch.
+                                text = stringResource(R.string.manage_hma_config_desc),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (rootCheckDone && !rootAvailable)
-                                    MaterialTheme.colorScheme.error
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
                                 else MaterialTheme.colorScheme.outline
                             )
                         }

@@ -16,7 +16,7 @@ class EmbeddedXposedPreset : BasePreset(NAME) {
         if (meta != null) {
             for (key in arrayOf("lspatch", "jshook", "xposedmodule", "com.taichi", "va_xposed")) {
                 if (meta.containsKey(key)) {
-                    Log.i(TAG, "MATCH (meta:$key) $pkgName")
+                    Log.v(TAG, "MATCH (meta:$key) $pkgName")
                     return true
                 }
             }
@@ -28,7 +28,7 @@ class EmbeddedXposedPreset : BasePreset(NAME) {
         return runCatching {
             java.util.zip.ZipFile(apkPath).use { zip ->
                 if (zip.getEntry("assets/xposed_init") != null) {
-                    Log.i(TAG, "MATCH (zip:xposed_init) $pkgName")
+                    Log.v(TAG, "MATCH (zip:xposed_init) $pkgName")
                     return@runCatching true
                 }
                 val libs = arrayOf("libsandhook.so", "libpine.so", "libxposed.so", "libxposed_lsp.so")
@@ -36,7 +36,7 @@ class EmbeddedXposedPreset : BasePreset(NAME) {
                 for (lib in libs) {
                     for (arch in arches) {
                         if (zip.getEntry("lib/$arch/$lib") != null) {
-                            Log.i(TAG, "MATCH (lib:$lib) $pkgName")
+                            Log.v(TAG, "MATCH (lib:$lib) $pkgName")
                             return@runCatching true
                         }
                     }
@@ -51,7 +51,7 @@ class EmbeddedXposedPreset : BasePreset(NAME) {
     override fun canBeAddedViaRoot(pkg: String, info: RootAppInfo): Boolean {
         val rootKeys = setOf("lspatch", "jshook", "xposedmodule", "com.taichi", "va_xposed")
         if (info.metaKeys.any { it in rootKeys }) {
-            Log.i(TAG, "MATCH (root:meta) $pkg")
+            Log.v(TAG, "MATCH (root:meta) $pkg")
             return true
         }
         return false

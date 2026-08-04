@@ -54,8 +54,8 @@ class HmaDocumentsProvider : DocumentsProvider() {
                 add(DocumentsContract.Root.COLUMN_ROOT_ID, DEFAULT_ROOT_ID)
                 add(DocumentsContract.Root.COLUMN_FLAGS, DocumentsContract.Root.FLAG_LOCAL_ONLY)
                 add(DocumentsContract.Root.COLUMN_ICON, R.drawable.ic_launcher_foreground)
-                add(DocumentsContract.Root.COLUMN_TITLE, "HMA Helper")
-                add(DocumentsContract.Root.COLUMN_SUMMARY, "Config exports")
+                add(DocumentsContract.Root.COLUMN_TITLE, context!!.getString(R.string.app_name))
+                add(DocumentsContract.Root.COLUMN_SUMMARY, context!!.getString(R.string.documents_summary))
                 add(DocumentsContract.Root.COLUMN_DOCUMENT_ID, "/")
             }
         }

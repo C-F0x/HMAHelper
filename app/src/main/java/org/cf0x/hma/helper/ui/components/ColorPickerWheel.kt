@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import org.cf0x.hma.helper.R
+import org.cf0x.hma.helper.ui.theme.DefaultSeedColor
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -58,7 +59,7 @@ private enum class DragZone { NONE, RING, SQUARE }
 
 @Composable
 fun ColorPickerWheel(
-    initialColor: Color = Color(0xFF6750A4),
+    initialColor: Color = DefaultSeedColor,
     onColorChanged: (Color) -> Unit,
     modifier: Modifier = Modifier
 ) {

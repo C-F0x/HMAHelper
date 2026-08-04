@@ -28,6 +28,7 @@ import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.SmartToy
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +43,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
@@ -67,26 +69,26 @@ fun MainScreen(
     val scopeConfigs by appManagerVM.scopeConfigs.collectAsState()
     val customTemplateCount by appManagerVM.templates.collectAsState()
 
-    // Dialog states
-    var showImportDialog by remember { mutableStateOf(false) }
-    var showExportDialog by remember { mutableStateOf(false) }
-    var showImportPreviewDialog by remember { mutableStateOf(false) }
-    var importPreviewTemplates by remember { mutableIntStateOf(0) }
-    var importPreviewScope by remember { mutableIntStateOf(0) }
-    var importPreviewJson by remember { mutableStateOf<String?>(null) }
+    // Dialog states (survive configuration changes)
+    var showImportDialog by rememberSaveable { mutableStateOf(false) }
+    var showExportDialog by rememberSaveable { mutableStateOf(false) }
+    var showImportPreviewDialog by rememberSaveable { mutableStateOf(false) }
+    var importPreviewTemplates by rememberSaveable { mutableIntStateOf(0) }
+    var importPreviewScope by rememberSaveable { mutableIntStateOf(0) }
+    var importPreviewJson by rememberSaveable { mutableStateOf<String?>(null) }
 
     // Smart classification expand state
-    var smartExpanded by remember { mutableStateOf(false) }
+    var smartExpanded by rememberSaveable { mutableStateOf(false) }
     // App manager expand state
-    var appManagerExpanded by remember { mutableStateOf(false) }
+    var appManagerExpanded by rememberSaveable { mutableStateOf(false) }
 
-    // Track status block height for proportional sizing
+    // Track status block height for proportional sizing (re-measured on rotation)
     var statusHeightPx by remember { mutableStateOf(0f) }
     val density = LocalDensity.current
     val statusHeightDp: Dp = with(density) { statusHeightPx.toDp() }
 
     // Misc expanded state
-    var miscExpanded by remember { mutableStateOf(false) }
+    var miscExpanded by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     // Misc config values
@@ -99,10 +101,19 @@ fun MainScreen(
     // Work mode + HMA takeover state
     val showImportExport by appSettings.showImportExport.collectAsState(initial = true)
     val manageHmaConfig by appSettings.manageHmaConfig.collectAsState(initial = false)
-    var showHmaRestartDialog by remember { mutableStateOf(false) }
-    var hmaRestarting by remember { mutableStateOf(false) }
+    var showHmaRestartDialog by rememberSaveable { mutableStateOf(false) }
+    var hmaRestarting by rememberSaveable { mutableStateOf(false) }
 
     val context = androidx.compose.ui.platform.LocalContext.current
+
+    // Debounced local copy of configVersion — avoids a DataStore write per keystroke.
+    var configVersionInput by remember(configVersion) { mutableStateOf(configVersion) }
+    LaunchedEffect(configVersionInput) {
+        if (configVersionInput != configVersion) {
+            delay(500)
+            scope.launch { appSettings.saveConfigVersion(configVersionInput) }
+        }
+    }
 
     fun buildExportJson(): JSONObject {
         val json = JSONObject()
@@ -151,8 +162,15 @@ fun MainScreen(
             sObj.put("excludeSystemApps", cfg.excludeSystemApps)
             val applyTemplates = JSONArray()
             cfg.enabledTemplates.forEach { name ->
-                val preset = PresetNaming.PRESETS.find { it.id == name }
-                applyTemplates.put(if (preset != null) PresetNaming.toPrefixedName(context, preset.id, cfg.useWhitelist) else name)
+                // Remap built-in template names to the CURRENT locale so the
+                // exported applyTemplates always matches the exported template
+                // section (handles cross-locale edits).
+                val presetId = PresetNaming.PRESETS.find { it.id == name }?.id
+                    ?: PresetNaming.resolveToId(context, name)
+                applyTemplates.put(
+                    if (presetId != null) PresetNaming.toPrefixedName(context, presetId, name.endsWith("_whitelist"))
+                    else name
+                )
             }
             sObj.put("applyTemplates", applyTemplates)
             val extra = JSONArray()
@@ -530,12 +548,12 @@ fun MainScreen(
                         ) {
                             // 1. configVersion
                             OutlinedTextField(
-                                value = configVersion.toString(),
+                                value = configVersionInput.toString(),
                                 onValueChange = { input ->
                                     val filtered = input.filter { it.isDigit() }
                                     val v = filtered.toIntOrNull()
                                     if (v != null && filtered.isNotEmpty()) {
-                                        scope.launch { appSettings.saveConfigVersion(v) }
+                                        configVersionInput = v
                                     }
                                 },
                                 modifier = Modifier.fillMaxWidth(),

@@ -26,7 +26,7 @@ private val Shapes = Shapes(
 fun HMAHelperTheme(
     themeMode: ThemeMode     = ThemeMode.SYSTEM,
     colorSource: ColorSource = ColorSource.MONET,
-    seedColor: Color         = Color(0xFF6750A4),
+    seedColor: Color         = DefaultSeedColor,
     paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     content: @Composable () -> Unit
 ) {

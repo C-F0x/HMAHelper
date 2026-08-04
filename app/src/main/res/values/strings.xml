@@ -61,6 +61,7 @@
     <string name="template_name">Template Name</string>
     <string name="template_name_empty">Name cannot be empty</string>
     <string name="template_name_duplicate">Name already in use</string>
+    <string name="template_name_invalid_chars">Name cannot contain | , : or newline</string>
     <string name="template_app_list">App List</string>
     <string name="template_no_apps">No apps selected</string>
     <string name="template_created">Template created</string>
@@ -188,6 +189,7 @@
     <string name="desc_add">Add</string>
     <string name="desc_deselect">Deselect</string>
     <string name="desc_create_template">Create Template</string>
+    <string name="documents_summary">Config exports</string>
     <string name="color_hex_label">Hex</string>
     <string name="color_hex_invalid">Invalid hex, format: #RRGGBB</string>
 </resources>

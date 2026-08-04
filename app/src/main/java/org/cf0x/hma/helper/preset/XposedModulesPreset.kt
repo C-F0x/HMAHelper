@@ -14,11 +14,11 @@ class XposedModulesPreset : BasePreset(NAME) {
         val meta = appInfo.metaData ?: return false
 
         if (meta.containsKey("xposedminversion")) {
-            Log.i(TAG, "MATCH (meta:xposedminversion) $pkgName")
+            Log.v(TAG, "MATCH (meta:xposedminversion) $pkgName")
             return true
         }
         if (meta.containsKey("xposeddescription")) {
-            Log.i(TAG, "MATCH (meta:xposeddescription) $pkgName")
+            Log.v(TAG, "MATCH (meta:xposeddescription) $pkgName")
             return true
         }
         return false
@@ -26,15 +26,15 @@ class XposedModulesPreset : BasePreset(NAME) {
 
     override fun canBeAddedViaRoot(pkg: String, info: RootAppInfo): Boolean {
         if (info.hasLibXposedProvider) {
-            Log.i(TAG, "MATCH (root:libxposed) $pkg")
+            Log.v(TAG, "MATCH (root:libxposed) $pkg")
             return true
         }
         if (info.metaKeys.contains("xposedminversion")) {
-            Log.i(TAG, "MATCH (root:xposedminversion) $pkg")
+            Log.v(TAG, "MATCH (root:xposedminversion) $pkg")
             return true
         }
         if (info.metaKeys.contains("xposeddescription")) {
-            Log.i(TAG, "MATCH (root:xposeddescription) $pkg")
+            Log.v(TAG, "MATCH (root:xposeddescription) $pkg")
             return true
         }
         return false

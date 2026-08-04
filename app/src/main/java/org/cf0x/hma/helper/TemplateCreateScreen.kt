@@ -60,8 +60,13 @@ fun TemplateCreateScreen(
     val templates by viewModel.templates.collectAsState()
 
     val reservedNames = remember(templates) {
-        if (editTemplateName != null) viewModel.getReservedNames() - editTemplateName
-        else viewModel.getReservedNames()
+        val all = viewModel.getReservedNames()
+        if (editTemplateName != null) {
+            // Exclude by lowercase so renaming "Foo"→"foo" is still caught as a duplicate.
+            all.filter { it.lowercase() != editTemplateName.lowercase() }
+        } else {
+            all
+        }
     }
 
     var templateName by rememberSaveable { mutableStateOf("") }
@@ -69,6 +74,9 @@ fun TemplateCreateScreen(
     var apps by rememberSaveable { mutableStateOf(emptyList<String>()) }
     var nameError by rememberSaveable { mutableStateOf<String?>(null) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    // Editing a template that no longer exists (or a broken route) must not
+    // silently "save" a blank form over nothing.
+    var editFound by rememberSaveable { mutableStateOf(editTemplateName == null) }
 
     // Populate from existing template once data is loaded.
     // For edits, wait until the template is actually present in the list
@@ -81,6 +89,7 @@ fun TemplateCreateScreen(
                 templateName = existing.name
                 isWhitelist = existing.isWhitelist
                 apps = existing.appList
+                editFound = true
                 templatePopulated = true
             } else if (editTemplateName == null) {
                 // Creating a new template: nothing to wait for.
@@ -102,6 +111,11 @@ fun TemplateCreateScreen(
     fun validateName(name: String): String? {
         val trimmed = name.trim()
         if (trimmed.isBlank()) return context.getString(R.string.template_name_empty)
+        // These characters would corrupt the DataStore encoding or the
+        // navigation route (| , : \n / ? # %).
+        if (trimmed.any { it == '|' || it == ',' || it == ':' || it == '\n' || it == '\r' || it == '/' || it == '?' || it == '#' || it == '%' }) {
+            return context.getString(R.string.template_name_invalid_chars)
+        }
         val lower = trimmed.lowercase()
         if (reservedNames.any { it.lowercase() == lower }) return context.getString(R.string.template_name_duplicate)
         return null
@@ -117,26 +131,29 @@ fun TemplateCreateScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = {
-                        val err = validateName(templateName)
-                        if (err != null) {
-                            nameError = err
-                            return@IconButton
-                        }
-                        val t = Template(
-                            name = templateName.trim(),
-                            isWhitelist = isWhitelist,
-                            appList = apps
-                        )
-                        if (editTemplateName != null) {
-                            viewModel.updateTemplate(editTemplateName, t)
-                            Md3Toast.show(context, context.getString(R.string.template_updated))
-                        } else {
-                            viewModel.addTemplate(t)
-                            Md3Toast.show(context, context.getString(R.string.template_created))
-                        }
-                        onBackClick()
-                    }) {
+                    IconButton(
+                        onClick = {
+                            val err = validateName(templateName)
+                            if (err != null) {
+                                nameError = err
+                                return@IconButton
+                            }
+                            val t = Template(
+                                name = templateName.trim(),
+                                isWhitelist = isWhitelist,
+                                appList = apps
+                            )
+                            if (editTemplateName != null) {
+                                viewModel.updateTemplate(editTemplateName, t)
+                                Md3Toast.show(context, context.getString(R.string.template_updated))
+                            } else {
+                                viewModel.addTemplate(t)
+                                Md3Toast.show(context, context.getString(R.string.template_created))
+                            }
+                            onBackClick()
+                        },
+                        enabled = editFound
+                    ) {
                         Icon(Icons.Filled.Save, contentDescription = stringResource(R.string.desc_save))
                     }
                     if (editTemplateName != null) {

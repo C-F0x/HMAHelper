@@ -18,6 +18,12 @@ object RootShell {
     /** Cap accumulated stdout so huge outputs (e.g. `dumpsys package`) can't OOM us. */
     private const val MAX_OUTPUT_CHARS = 64 * 1024 * 1024
 
+    // Cached root availability — `su -c id` is called on every scan, so memoize
+    // it briefly to avoid repeated ~100ms root invocations.
+    private const val ROOT_CACHE_MS = 15_000L
+    @Volatile private var cachedRoot: Boolean? = null
+    @Volatile private var cachedRootAt: Long = 0
+
     private fun execRaw(args: Array<String>, input: String? = null, timeoutMs: Long = 20000): String? {
         return runCatching {
             val proc = Runtime.getRuntime().exec(args)
@@ -76,9 +82,16 @@ object RootShell {
     fun execDirect(command: String): String? =
         execRaw(arrayOf("sh", "-c", command))
 
-    /** True if the app has been granted root by the active su implementation. */
+    /** True if the app has been granted root by the active su implementation. Cached briefly. */
     fun isRootAvailable(): Boolean {
+        val now = System.currentTimeMillis()
+        cachedRoot?.let {
+            if (now - cachedRootAt < ROOT_CACHE_MS) return it
+        }
         val out = exec("id") ?: return false
-        return out.contains("uid=0")
+        val available = out.contains("uid=0")
+        cachedRoot = available
+        cachedRootAt = now
+        return available
     }
 }

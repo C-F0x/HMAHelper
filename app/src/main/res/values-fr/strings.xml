@@ -33,6 +33,7 @@
     <string name="template_name">Nom du modèle</string>
     <string name="template_name_empty">Le nom ne peut pas être vide</string>
     <string name="template_name_duplicate">Nom déjà utilisé</string>
+    <string name="template_name_invalid_chars">Le nom ne peut pas contenir | , : ou un saut de ligne</string>
     <string name="template_app_list">Liste d\'applications</string>
     <string name="template_no_apps">Aucune application sélectionnée</string>
     <string name="template_created">Modèle créé</string>
@@ -151,6 +152,7 @@
     <string name="desc_add">Ajouter</string>
     <string name="desc_deselect">Désélectionner</string>
     <string name="desc_create_template">Créer un modèle</string>
+    <string name="documents_summary">Exports de configuration</string>
     <string name="color_hex_label">Hexadécimal</string>
     <string name="color_hex_invalid">Hexadécimal invalide, format : #RRGGBB</string>
 

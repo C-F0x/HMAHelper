@@ -15,7 +15,7 @@ class CustomROMPreset : BasePreset(NAME) {
     override fun canBeAddedIntoPreset(appInfo: ApplicationInfo): Boolean {
         // APK path fragments from data file
         if (PresetListLoader.customRomPathFragments.any { appInfo.sourceDir.contains(it) }) {
-            Log.i(TAG, "MATCH (path) $appInfo.packageName")
+            Log.v(TAG, "MATCH (path) $appInfo.packageName")
             return true
         }
         // keyword matching handled by BasePreset.addPackageInfoPreset
@@ -25,7 +25,7 @@ class CustomROMPreset : BasePreset(NAME) {
     override fun canBeAddedViaRoot(pkg: String, info: RootAppInfo): Boolean {
         val path = info.apkPath
         if (path != null && PresetListLoader.customRomPathFragments.any { path.contains(it) }) {
-            Log.i(TAG, "MATCH (root:path) $pkg")
+            Log.v(TAG, "MATCH (root:path) $pkg")
             return true
         }
         return super.canBeAddedViaRoot(pkg, info)

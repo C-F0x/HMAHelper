@@ -11,6 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
@@ -25,6 +26,7 @@ import org.cf0x.hma.helper.data.AppSettings
 import org.cf0x.hma.helper.data.ColorSource
 import org.cf0x.hma.helper.data.ThemeMode
 import org.cf0x.hma.helper.ui.theme.HMAHelperTheme
+import org.cf0x.hma.helper.ui.theme.DefaultSeedColor
 import kotlinx.coroutines.runBlocking
 
 class MainActivity : ComponentActivity() {
@@ -59,7 +61,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeMode       by appSettings.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
             val colorSource     by appSettings.colorSource.collectAsState(initial = ColorSource.MONET)
-            val presetColor     by appSettings.presetColor.collectAsState(initial = Color(0xFF6750A4))
+            val presetColor     by appSettings.presetColor.collectAsState(initial = DefaultSeedColor)
             val paletteStyle    by appSettings.paletteStyle.collectAsState(initial = PaletteStyle.TonalSpot)
 
             HMAHelperTheme(
@@ -187,8 +189,11 @@ fun AppNavigation(
                 viewModel = appManagerVM,
                 onBackClick = { navController.popBackStack() },
                 onExtraAppListClick = { configPkg, currentExtra ->
+                    // The screen already persisted the full UI state silently;
+                    // keep this quiet too — recording an HMA change here would
+                    // push unconfirmed edits the moment the button is tapped.
                     val existing = appManagerVM.getConfig(configPkg) ?: AppScopeConfig()
-                    appManagerVM.saveConfig(configPkg, existing.copy(extraAppList = currentExtra))
+                    appManagerVM.saveConfigSilent(configPkg, existing.copy(extraAppList = currentExtra))
                     navController.navigate("extra_app_list/$configPkg")
                 }
             )
@@ -198,6 +203,7 @@ fun AppNavigation(
             arguments = listOf(navArgument("configPackageName") { type = NavType.StringType })
         ) { backStackEntry ->
             val configPkg = backStackEntry.arguments?.getString("configPackageName") ?: return@composable
+            LaunchedEffect(Unit) { appManagerVM.resetPickerState() }
             val initialExtra = appManagerVM.getConfig(configPkg)?.extraAppList ?: emptyList()
             ExtraAppListScreen(
                 configPackageName = configPkg,
@@ -224,14 +230,17 @@ fun AppNavigation(
             )
         }
         composable("scope_select") {
+            LaunchedEffect(Unit) { appManagerVM.resetPickerState() }
             AppManagerScreen(
                 viewModel = appManagerVM,
                 titleRes = R.string.app_manager_title,
                 onBackClick = { navController.popBackStack() },
                 onExtraConfirm = { selected ->
-                    val pkgsStr = selected.joinToString(",")
-                    navController.navigate("app_config/$pkgsStr") {
-                        popUpTo("scope_settings") { inclusive = false }
+                    if (selected.isNotEmpty()) {
+                        val pkgsStr = selected.joinToString(",")
+                        navController.navigate("app_config/$pkgsStr") {
+                            popUpTo("scope_settings") { inclusive = false }
+                        }
                     }
                 }
             )

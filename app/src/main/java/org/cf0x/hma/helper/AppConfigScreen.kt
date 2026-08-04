@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import org.cf0x.hma.helper.ui.components.SegmentSwitch
 
 // ─────────────────────────────────────────────────
@@ -59,29 +60,41 @@ fun AppConfigScreen(
 
     val presetContext = LocalContext.current
 
-    // Load existing config — wait for DataStore to supply scopeConfigs first
+    // Load existing config — wait briefly for DataStore to supply the target
+    // scope config (bounded, so an empty config never hangs this coroutine).
     LaunchedEffect(refPkg) {
         if (!isMultiEdit && refPkg.isNotBlank()) {
-            snapshotFlow { scopeConfigs[refPkg] }
-                .dropWhile { it == null && scopeConfigs.isEmpty() }
-                .first()
-                ?.let { existing ->
-                    useWhitelist = existing.useWhitelist
-                    excludeSystem = existing.excludeSystemApps
-                    aggressiveFilter = existing.aggressiveFilter
-                    enabledTemplates = existing.enabledTemplates.map { name ->
-                        val preset = PresetNaming.PRESETS.find { it.id == name }
-                        if (preset != null) PresetNaming.toPrefixedName(presetContext, preset.id, existing.useWhitelist) else name
-                    }.toSet()
-                    extraPackages = existing.extraAppList
-                }
+            val existing = withTimeoutOrNull(1000) {
+                snapshotFlow { scopeConfigs[refPkg] }
+                    .dropWhile { it == null }
+                    .first()
+            }
+            if (existing != null) {
+                useWhitelist = existing.useWhitelist
+                excludeSystem = existing.excludeSystemApps
+                aggressiveFilter = existing.aggressiveFilter
+                enabledTemplates = existing.enabledTemplates.map { name ->
+                    // Remap to the current locale: either a stored preset id
+                    // or a prefixed name from another locale.
+                    val presetId = PresetNaming.PRESETS.find { it.id == name }?.id
+                        ?: PresetNaming.resolveToId(presetContext, name)
+                    if (presetId != null) {
+                        PresetNaming.toPrefixedName(presetContext, presetId, name.endsWith("_whitelist"))
+                    } else {
+                        name
+                    }
+                }.toSet()
+                extraPackages = existing.extraAppList
+            }
         }
     }
 
-    // Watch for extraPackages updates from shared ViewModel (e.g. after ExtraAppListScreen)
+    // Watch for extraPackages updates from the shared ViewModel (e.g. after
+    // ExtraAppListScreen). Single-select only — batch edit starts from defaults
+    // and must NOT inherit the first package's extra list.
     val refConfig = scopeConfigs[refPkg]
     LaunchedEffect(refConfig) {
-        if (refConfig != null) {
+        if (!isMultiEdit && refConfig != null) {
             extraPackages = refConfig.extraAppList
         }
     }
@@ -179,9 +192,16 @@ fun AppConfigScreen(
                         onSelect = { index ->
                             val newMode = index == 1
                             useWhitelist = newMode
-                            // Drop templates that don't match the new mode
+                            // Drop templates that don't match the new mode.
+                            // Preset names carry a "_whitelist" suffix; custom
+                            // templates carry their mode in isWhitelist instead.
                             enabledTemplates = enabledTemplates.filter { name ->
-                                name.endsWith("_whitelist") == newMode
+                                val preset = presetTemplates.find { it.storedName == name }
+                                if (preset != null) {
+                                    name.endsWith("_whitelist") == newMode
+                                } else {
+                                    customTemplates.find { it.name == name }?.isWhitelist == newMode
+                                }
                             }.toSet()
                         }
                     )
@@ -310,8 +330,10 @@ fun AppConfigScreen(
                             Text(stringResource(R.string.config_extra_apps), style = MaterialTheme.typography.bodyLarge)
                             TextButton(onClick = {
                                 // Persist local state before navigating, so
-                                // templates/filter selections survive the round-trip
-                                viewModel.saveConfig(refPkg, AppScopeConfig(
+                                // templates/filter selections survive the
+                                // round-trip — but do NOT record an HMA change
+                                // (this is a transient save, not a user edit).
+                                viewModel.saveConfigSilent(refPkg, AppScopeConfig(
                                     useWhitelist = useWhitelist,
                                     aggressiveFilter = aggressiveFilter,
                                     excludeSystemApps = excludeSystem,

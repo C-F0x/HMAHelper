@@ -19,13 +19,13 @@ class AccessibilityAppsPreset(private val presetManager: PresetManager) : BasePr
             val manifestStr = presetManager.readManifest(key, zipFile)
             manifestStr.contains(PERM_ACCESSIBILITY)
         }
-        if (result) Log.i(TAG, "MATCH $pkgName")
+        if (result) Log.v(TAG, "MATCH $pkgName")
         return result
     }
 
     override fun canBeAddedViaRoot(pkg: String, info: RootAppInfo): Boolean {
         if (info.hasAccessibilityService) {
-            Log.i(TAG, "MATCH (root:accessibility) $pkg")
+            Log.v(TAG, "MATCH (root:accessibility) $pkg")
             return true
         }
         return false

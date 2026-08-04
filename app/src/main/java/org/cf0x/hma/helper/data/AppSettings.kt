@@ -3,6 +3,7 @@ package org.cf0x.hma.helper.data
 import android.content.Context
 import android.util.Log
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
@@ -10,6 +11,7 @@ import com.materialkolor.PaletteStyle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.cf0x.hma.helper.R
+import org.cf0x.hma.helper.ui.theme.DefaultSeedColor
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -66,7 +68,7 @@ class AppSettings(private val context: Context) {
     }
 
     val presetColor: Flow<Color> = context.dataStore.data.map { p ->
-        Color(p[Keys.PRESET_COLOR] ?: 0xFF6750A4.toInt())
+        Color(p[Keys.PRESET_COLOR] ?: DefaultSeedColor.toArgb())
     }
 
     val appLocale: Flow<AppLocale> = context.dataStore.data.map { p ->
